@@ -21,7 +21,7 @@ class TurnoAjenoTest extends TestCase
 {
     private Caja $caja;
     private TurnoCaja $turno;
-    private Producto $pan;
+    private Producto $latteHelado;
 
     protected function setUp(): void
     {
@@ -29,12 +29,12 @@ class TurnoAjenoTest extends TestCase
         $this->seed([CajaSeeder::class, UnidadesMedidaSeeder::class]);
 
         $this->caja = Caja::first();
-        $this->pan = Producto::create([
-            'nombre' => 'Pan francés', 'tipo' => 'bien', 'clase' => 'producto_terminado',
+        $this->latteHelado = Producto::create([
+            'nombre' => 'Latte helado', 'tipo' => 'bien', 'clase' => 'producto_terminado',
             'precio_venta' => 1, 'costo_unitario' => 0.5,
             'unidad_medida_id' => UnidadesMedida::where('nombre', 'Unidad')->value('id'),
         ]);
-        Inventario::create(['producto_id' => $this->pan->id, 'stock_actual' => 50, 'stock_minimo' => 0]);
+        Inventario::create(['producto_id' => $this->latteHelado->id, 'stock_actual' => 50, 'stock_minimo' => 0]);
 
         $mesero1 = $this->crearUsuario('mesero', ['nombre' => 'Mesero 1']);
         $this->turno = CajaService::abrir($this->caja->id, 20, $mesero1->id);
@@ -45,7 +45,7 @@ class TurnoAjenoTest extends TestCase
         return $this->postJson('/api/pos/ventas', array_merge([
             'uuid'    => (string) Str::uuid(),
             'caja_id' => $this->caja->id,
-            'items'   => [['producto_id' => $this->pan->id, 'cantidad' => 1]],
+            'items'   => [['producto_id' => $this->latteHelado->id, 'cantidad' => 1]],
             'pagos'   => [['metodo_pago_id' => MetodoPago::where('nombre', 'Efectivo')->value('id'), 'monto' => 1]],
         ], $extra));
     }
@@ -106,7 +106,7 @@ class TurnoAjenoTest extends TestCase
             'turno_id'           => $this->turno->id,
             'numero_provisional' => 'OFF-1-000001',
             'fecha_venta'        => now()->subMinutes(5)->toIso8601String(),
-            'items'              => [['producto_id' => $this->pan->id, 'cantidad' => 1, 'precio_unitario' => 1]],
+            'items'              => [['producto_id' => $this->latteHelado->id, 'cantidad' => 1, 'precio_unitario' => 1]],
             'pagos'              => [['metodo_pago_id' => MetodoPago::where('nombre', 'Efectivo')->value('id'), 'monto' => 1]],
         ]]])->assertOk();
         $this->assertSame(1, Venta::count());

@@ -26,7 +26,7 @@ class InventarioFase1Test extends TestCase
     private function crearProducto(array $atributos = [], float $stock = 0, float $minimo = 0): Producto
     {
         $producto = Producto::create(array_merge([
-            'nombre'           => 'Pan francés',
+            'nombre'           => 'Latte helado',
             'tipo'             => 'bien',
             'clase'            => 'producto_terminado',
             'costo_unitario'   => 1,
@@ -149,15 +149,15 @@ class InventarioFase1Test extends TestCase
     public function test_producto_por_unidad_no_acepta_decimales(): void
     {
         $this->actuarComo('encargado_inventario');
-        $pan    = $this->crearProducto(['permite_fraccion' => false]);
-        $harina = $this->crearProducto([
-            'nombre' => 'Harina', 'clase' => 'materia_prima', 'permite_fraccion' => true,
+        $latteHelado    = $this->crearProducto(['permite_fraccion' => false]);
+        $cafeMolido = $this->crearProducto([
+            'nombre' => 'Café molido', 'clase' => 'materia_prima', 'permite_fraccion' => true,
             'unidad_medida_id' => $this->unidad('Libra')->id,
         ]);
 
-        $this->registrar($pan, 'entrada', 1.5)
+        $this->registrar($latteHelado, 'entrada', 1.5)
             ->assertStatus(422)->assertJsonPath('status', 'BUSINESS_RULE');
-        $this->registrar($harina, 'entrada', 1.5)->assertOk();
+        $this->registrar($cafeMolido, 'entrada', 1.5)->assertOk();
     }
 
     public function test_producto_sin_control_de_stock_no_mueve_inventario(): void
@@ -193,13 +193,13 @@ class InventarioFase1Test extends TestCase
     public function test_stock_filtra_por_clase_y_estado_y_excluye_servicios(): void
     {
         $this->actuarComo('encargado_inventario');
-        $this->crearProducto(['nombre' => 'Pan'], stock: 1, minimo: 5);
-        $this->crearProducto(['nombre' => 'Harina', 'clase' => 'materia_prima'], stock: 100, minimo: 5);
+        $this->crearProducto(['nombre' => 'Latte'], stock: 1, minimo: 5);
+        $this->crearProducto(['nombre' => 'Café molido', 'clase' => 'materia_prima'], stock: 100, minimo: 5);
         $this->crearProducto(['nombre' => 'Servicio', 'controla_stock' => false]);
 
         $this->assertCount(2, $this->getJson('/api/inventario/stock')->json());
-        $this->assertSame(['Harina'], array_column($this->getJson('/api/inventario/stock?clase=materia_prima')->json(), 'producto'));
-        $this->assertSame(['Pan'], array_column($this->getJson('/api/inventario/stock?estado=alerta')->json(), 'producto'));
+        $this->assertSame(['Café molido'], array_column($this->getJson('/api/inventario/stock?clase=materia_prima')->json(), 'producto'));
+        $this->assertSame(['Latte'], array_column($this->getJson('/api/inventario/stock?estado=alerta')->json(), 'producto'));
     }
 
     public function test_actualizar_stock_minimo_requiere_permiso(): void
@@ -260,18 +260,18 @@ class InventarioFase1Test extends TestCase
     public function test_historial_de_movimientos_filtra_por_tipo_y_producto(): void
     {
         $this->actuarComo('encargado_inventario');
-        $pan    = $this->crearProducto(['nombre' => 'Pan']);
-        $harina = $this->crearProducto(['nombre' => 'Harina']);
+        $latteHelado    = $this->crearProducto(['nombre' => 'Latte']);
+        $cafeMolido = $this->crearProducto(['nombre' => 'Café molido']);
 
-        $this->registrar($pan, 'entrada', 5)->assertOk();
-        $this->registrar($pan, 'salida', 1)->assertOk();
-        $this->registrar($harina, 'entrada', 3)->assertOk();
+        $this->registrar($latteHelado, 'entrada', 5)->assertOk();
+        $this->registrar($latteHelado, 'salida', 1)->assertOk();
+        $this->registrar($cafeMolido, 'entrada', 3)->assertOk();
 
         $this->assertSame(3, $this->getJson('/api/inventario/movimientos')->json('total'));
         $this->assertSame(2, $this->getJson('/api/inventario/movimientos?tipo=entrada')->json('total'));
         $this->assertSame(
-            ['Pan', 'Pan'],
-            array_column($this->getJson("/api/inventario/movimientos?producto_id={$pan->id}")->json('movimientos'), 'producto')
+            ['Latte', 'Latte'],
+            array_column($this->getJson("/api/inventario/movimientos?producto_id={$latteHelado->id}")->json('movimientos'), 'producto')
         );
     }
 
@@ -300,7 +300,7 @@ class InventarioFase1Test extends TestCase
             ->assertStatus(403);
 
         // Sin tocar precio ni costo sí puede editar
-        $this->postJson("/api/productos/actualizar/{$producto->id}", $this->datosProducto($producto, ['nombre' => 'Pan francés grande']))
+        $this->postJson("/api/productos/actualizar/{$producto->id}", $this->datosProducto($producto, ['nombre' => 'Latte helado grande']))
             ->assertOk();
 
         $this->actuarComo('admin');
@@ -316,7 +316,7 @@ class InventarioFase1Test extends TestCase
         $this->actuarComo('admin');
 
         $id = $this->postJson('/api/productos/registro', [
-            'nombre'           => 'Decoración de pastel',
+            'nombre'           => 'Decoración de frappé',
             'clase'            => 'producto_terminado',
             'se_vende'         => true,
             'controla_stock'   => false,

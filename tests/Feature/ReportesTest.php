@@ -20,8 +20,8 @@ use Tests\TestCase;
 class ReportesTest extends TestCase
 {
     private Caja $caja;
-    private Producto $pan;
-    private Producto $pastel;
+    private Producto $latteHelado;
+    private Producto $frappe;
 
     protected function setUp(): void
     {
@@ -32,12 +32,12 @@ class ReportesTest extends TestCase
 
         $this->caja = Caja::first();
         $unidad = UnidadesMedida::where('nombre', 'Unidad')->value('id');
-        $this->pan = Producto::create(['nombre' => 'Pan francés', 'tipo' => 'bien', 'clase' => 'producto_terminado',
+        $this->latteHelado = Producto::create(['nombre' => 'Latte helado', 'tipo' => 'bien', 'clase' => 'producto_terminado',
             'precio_venta' => 1.13, 'costo_unitario' => 0.40, 'unidad_medida_id' => $unidad]);
-        $this->pastel = Producto::create(['nombre' => 'Pastel', 'tipo' => 'bien', 'clase' => 'producto_terminado',
+        $this->frappe = Producto::create(['nombre' => 'Frappé', 'tipo' => 'bien', 'clase' => 'producto_terminado',
             'precio_venta' => 11.30, 'costo_unitario' => 4, 'unidad_medida_id' => $unidad]);
-        Inventario::create(['producto_id' => $this->pan->id, 'stock_actual' => 100]);
-        Inventario::create(['producto_id' => $this->pastel->id, 'stock_actual' => 10]);
+        Inventario::create(['producto_id' => $this->latteHelado->id, 'stock_actual' => 100]);
+        Inventario::create(['producto_id' => $this->frappe->id, 'stock_actual' => 10]);
 
         CajaService::abrir($this->caja->id, 100, $this->crearUsuario('cajero')->id);
     }
@@ -50,15 +50,15 @@ class ReportesTest extends TestCase
         ])->assertCreated();
     }
 
-    // Venta de 10 panes ($11.30) y 1 pastel ($11.30, con tarjeta); se devuelven 2 panes
+    // Venta de 10 lattes helados ($11.30) y 1 frappé ($11.30, con tarjeta); se devuelven 2 lattes helados
     private function diaDeVentas(): void
     {
         $this->actuarComo('admin');
-        $venta = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 10]], 'Efectivo', 20)->json('venta');
-        $this->vender([['producto_id' => $this->pastel->id, 'cantidad' => 1]], 'Tarjeta', 11.30);
+        $venta = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 10]], 'Efectivo', 20)->json('venta');
+        $this->vender([['producto_id' => $this->frappe->id, 'cantidad' => 1]], 'Tarjeta', 11.30);
 
         $this->postJson("/api/pos/ventas/{$venta['id']}/devoluciones", [
-            'uuid' => (string) Str::uuid(), 'caja_id' => $this->caja->id, 'motivo' => 'Pan duro',
+            'uuid' => (string) Str::uuid(), 'caja_id' => $this->caja->id, 'motivo' => 'Café frío',
             'items' => [['venta_detalle_id' => $venta['detalles'][0]['id'], 'cantidad' => 2]],
         ])->assertCreated();
 
@@ -67,7 +67,7 @@ class ReportesTest extends TestCase
             'descripcion' => 'Gas', 'monto' => 5, 'origen' => 'caja', 'caja_id' => $this->caja->id,
         ], ['Accept' => 'application/json'])->assertCreated();
 
-        $this->postJson('/api/mermas', ['items' => [['uuid' => (string) Str::uuid(), 'producto_id' => $this->pan->id, 'cantidad' => 3, 'motivo' => 'vencido']]])
+        $this->postJson('/api/mermas', ['items' => [['uuid' => (string) Str::uuid(), 'producto_id' => $this->latteHelado->id, 'cantidad' => 3, 'motivo' => 'vencido']]])
             ->assertCreated();
     }
 
@@ -92,7 +92,7 @@ class ReportesTest extends TestCase
     {
         $this->diaDeVentas();
 
-        // 13.14 de utilidad bruta − 1.20 de merma (3 panes a 0.40) − 5.00 de gas
+        // 13.14 de utilidad bruta − 1.20 de merma (3 lattes helados a 0.40) − 5.00 de gas
         $this->getJson('/api/reportes/resultados')->assertOk()
             ->assertJsonPath('reporte.totales.utilidad_bruta', 13.14)
             ->assertJsonPath('reporte.totales.mermas', 1.2)
@@ -109,7 +109,7 @@ class ReportesTest extends TestCase
         $this->assertEquals(11.3, $metodos['Tarjeta']['neto']);
 
         $productos = $this->getJson('/api/reportes/productos_vendidos')->json('reporte.filas');
-        $this->assertSame('Pastel', $productos[0]['producto']);
+        $this->assertSame('Frappé', $productos[0]['producto']);
         $this->assertEquals(8, $productos[1]['cantidad']);            // 10 − 2 devueltos
         $this->assertEquals(9.04, $productos[1]['ventas']);
 
@@ -119,7 +119,7 @@ class ReportesTest extends TestCase
     public function test_venta_anulada_no_cuenta(): void
     {
         $this->actuarComo('admin');
-        $id = $this->vender([['producto_id' => $this->pastel->id, 'cantidad' => 1]])->json('venta.id');
+        $id = $this->vender([['producto_id' => $this->frappe->id, 'cantidad' => 1]])->json('venta.id');
         $this->postJson("/api/pos/ventas/{$id}/anular", ['motivo' => 'Error'])->assertOk();
 
         $this->getJson('/api/reportes/ventas_diarias')->assertJsonCount(0, 'reporte.filas');
@@ -131,7 +131,7 @@ class ReportesTest extends TestCase
         $this->diaDeVentas();
 
         foreach (array_keys(ReportesService::REPORTES) as $tipo) {
-            $params = $tipo === 'kardex' ? "?producto_id={$this->pan->id}" : '';
+            $params = $tipo === 'kardex' ? "?producto_id={$this->latteHelado->id}" : '';
             $this->getJson("/api/reportes/{$tipo}{$params}")->assertOk()
                 ->assertJsonStructure(['reporte' => ['titulo', 'periodo', 'columnas', 'filas']]);
         }
@@ -146,7 +146,7 @@ class ReportesTest extends TestCase
     {
         $this->actuarComo('admin');
 
-        // Pan 100 × 0.40 + pastel 10 × 4 = 80
+        // Latte 100 × 0.40 + frappé 10 × 4 = 80
         $this->getJson('/api/reportes/inventario_valorizado')->assertOk()
             ->assertJsonPath('reporte.totales.valor', 80)
             ->assertJsonPath('reporte.indicadores.0.valor', 80);
@@ -203,7 +203,7 @@ class ReportesTest extends TestCase
         $this->assertSame('Tarjeta', $r['ultimos_pedidos'][0]['pago']);
         $this->assertSame('Consumidor final', $r['ultimos_pedidos'][0]['cliente']);
         $this->assertSame(2, $r['total_productos']);
-        $this->assertEquals(8, $r['mas_vendidos'][0]['cantidad']); // 10 panes menos 2 devueltos
+        $this->assertEquals(8, $r['mas_vendidos'][0]['cantidad']); // 10 lattes helados menos 2 devueltos
 
         // Un periodo sin ventas viene en cero
         $this->getJson('/api/panel?desde=2020-01-01&hasta=2020-01-31')->assertJsonPath('panel.rango.total_pedidos', 0);

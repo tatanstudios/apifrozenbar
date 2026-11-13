@@ -5,13 +5,13 @@ Estado: terminada el 2026-11-02. Pedida por el cliente después del plan. Fase a
 ## Qué cubre
 
 - **Recetas de venta.**
-  - **Cuándo aplica:** el producto **no lleva inventario propio** (limonada, desayuno, servicio de mañanitas). Su receta se descuenta al venderlo.
-  - **Recetas de producción:** si el producto sí lleva inventario (frijoles cocidos, pan), su receta se usa al producir, como antes.
+  - **Cuándo aplica:** el producto **no lleva inventario propio** (limonada, desayuno, combo de cumpleaños). Su receta se descuenta al venderlo.
+  - **Recetas de producción:** si el producto sí lleva inventario (frijoles cocidos, tapioca cocida), su receta se usa al producir, como antes.
   - **Tipo de receta:** lo decide el sistema al guardarla (`recetas.uso`); nadie lo elige a mano.
   - **Al vender:** cada insumo sale con el movimiento `venta`, a su costo promedio. El motivo dice qué se vendió («Venta T-000013: Limonada»). El costo de la línea es la suma de los insumos.
   - **Rendimiento:** dice para cuántas unidades vendidas alcanzan los ingredientes (normalmente 1).
   - **Anular la venta** devuelve los insumos. En una **devolución** no regresan, porque ya se usaron.
-- **Servicios con insumos.** Usan el mismo mecanismo. «Cantar las mañanitas» a $3.00 es un producto sin inventario cuya receta lleva pastel y gorro.
+- **Servicios con insumos.** Usan el mismo mecanismo. «Combo de cumpleaños» a $3.00 es un producto sin inventario cuya receta lleva frappé y vela.
 - **Consumo interno** (`productos.consumo_interno`):
   - **Para qué es:** la cena típica del personal y las cortesías.
   - **Precio:** siempre $0.00, aunque se mande otro precio. No pide pago y no entra a la caja.

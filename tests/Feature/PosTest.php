@@ -26,8 +26,8 @@ class PosTest extends TestCase
 
     private Caja $caja;
     private TurnoCaja $turno;
-    private Producto $pan;
-    private Producto $pastel;   // no lleva inventario
+    private Producto $latteHelado;
+    private Producto $frappe;   // no lleva inventario
     private Producto $queso;    // se vende por peso
 
     protected function setUp(): void
@@ -39,8 +39,8 @@ class PosTest extends TestCase
         $unidad = UnidadesMedida::where('nombre', 'Unidad')->first();
         $libra  = UnidadesMedida::where('nombre', 'Libra')->first();
 
-        $this->pan    = $this->producto(['nombre' => 'Pan francés', 'precio_venta' => 0.15, 'costo_unitario' => 0.05, 'unidad_medida_id' => $unidad->id], 100);
-        $this->pastel = $this->producto(['nombre' => 'Decoración', 'precio_venta' => 10, 'costo_unitario' => 0, 'controla_stock' => false, 'unidad_medida_id' => $unidad->id]);
+        $this->latteHelado    = $this->producto(['nombre' => 'Latte helado', 'precio_venta' => 0.15, 'costo_unitario' => 0.05, 'unidad_medida_id' => $unidad->id], 100);
+        $this->frappe = $this->producto(['nombre' => 'Decoración', 'precio_venta' => 10, 'costo_unitario' => 0, 'controla_stock' => false, 'unidad_medida_id' => $unidad->id]);
         $this->queso  = $this->producto(['nombre' => 'Queso', 'precio_venta' => 3, 'costo_unitario' => 2, 'permite_fraccion' => true, 'clase' => 'reventa', 'unidad_medida_id' => $libra->id], 10);
 
         $abre = $this->crearUsuario('cajero');
@@ -93,7 +93,7 @@ class PosTest extends TestCase
         $this->actuarComo('cajero');
 
         $res = $this->vender(
-            [['producto_id' => $this->pan->id, 'cantidad' => 10], ['producto_id' => $this->pastel->id, 'cantidad' => 1]],
+            [['producto_id' => $this->latteHelado->id, 'cantidad' => 10], ['producto_id' => $this->frappe->id, 'cantidad' => 1]],
             $this->efectivo(20)
         )->assertCreated();
 
@@ -105,30 +105,30 @@ class PosTest extends TestCase
             ->assertJsonPath('venta.pagos.0.recibido', 20)
             ->assertJsonPath('venta.pagos.0.monto', 11.5);
 
-        $this->assertEquals(90, $this->stock($this->pan));
+        $this->assertEquals(90, $this->stock($this->latteHelado));
         $this->assertEquals(31.5, $this->esperado());          // fondo 20 + venta 11.50 (no el billete de 20)
         $this->assertEquals(0.5, (float) Venta::first()->costo_total);
-        $this->assertDatabaseHas('movimientos_inventario', ['producto_id' => $this->pan->id, 'tipo' => 'venta', 'referencia_tipo' => 'venta']);
+        $this->assertDatabaseHas('movimientos_inventario', ['producto_id' => $this->latteHelado->id, 'tipo' => 'venta', 'referencia_tipo' => 'venta']);
     }
 
     public function test_el_mismo_uuid_no_duplica_la_venta(): void
     {
         $this->actuarComo('cajero');
         $uuid = (string) Str::uuid();
-        $items = [['producto_id' => $this->pan->id, 'cantidad' => 2]];
+        $items = [['producto_id' => $this->latteHelado->id, 'cantidad' => 2]];
 
         $this->vender($items, $this->efectivo(1), ['uuid' => $uuid])->assertCreated();
         $this->vender($items, $this->efectivo(1), ['uuid' => $uuid])->assertOk()->assertJsonPath('venta.numero', '000001');
 
         $this->assertSame(1, Venta::count());
-        $this->assertEquals(98, $this->stock($this->pan));
+        $this->assertEquals(98, $this->stock($this->latteHelado));
     }
 
     public function test_pago_combinado_tarjeta_y_efectivo(): void
     {
         $this->actuarComo('cajero');
 
-        $this->vender([['producto_id' => $this->pastel->id, 'cantidad' => 1]], [
+        $this->vender([['producto_id' => $this->frappe->id, 'cantidad' => 1]], [
             ['metodo_pago_id' => $this->metodo('Tarjeta'), 'monto' => 4],
             ['metodo_pago_id' => $this->metodo('Efectivo'), 'monto' => 10],
         ])->assertCreated()
@@ -142,7 +142,7 @@ class PosTest extends TestCase
     public function test_pagos_invalidos_se_rechazan(): void
     {
         $this->actuarComo('cajero');
-        $item = [['producto_id' => $this->pastel->id, 'cantidad' => 1]];
+        $item = [['producto_id' => $this->frappe->id, 'cantidad' => 1]];
 
         $this->vender($item, $this->efectivo(9.99))->assertStatus(422)->assertJsonPath('message', 'Pago incompleto: faltan $0.01');
         $this->vender($item, [['metodo_pago_id' => $this->metodo('Tarjeta'), 'monto' => 12]])->assertStatus(422);
@@ -157,7 +157,7 @@ class PosTest extends TestCase
         $this->actuarComo('cajero');
         $this->turno->update(['estado' => 'cerrado']);
 
-        $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 1]], $this->efectivo(1))
+        $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 1]], $this->efectivo(1))
             ->assertStatus(422)
             ->assertJsonPath('message', 'No hay un turno abierto en esta caja. Abre el turno para vender.');
     }
@@ -168,7 +168,7 @@ class PosTest extends TestCase
 
         $this->vender([['producto_id' => $this->queso->id, 'cantidad' => 1.5]], $this->efectivo(4.5))
             ->assertCreated()->assertJsonPath('venta.total', 4.5);
-        $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 1.5]], $this->efectivo(1))->assertStatus(422);
+        $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 1.5]], $this->efectivo(1))->assertStatus(422);
 
         $this->assertEquals(8.5, $this->stock($this->queso));
     }
@@ -176,9 +176,9 @@ class PosTest extends TestCase
     public function test_producto_que_no_se_vende_se_rechaza(): void
     {
         $this->actuarComo('cajero');
-        $this->pan->update(['se_vende' => false]);
+        $this->latteHelado->update(['se_vende' => false]);
 
-        $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 1]], $this->efectivo(1))->assertStatus(422);
+        $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 1]], $this->efectivo(1))->assertStatus(422);
     }
 
     public function test_sin_stock_y_sin_permitir_negativo_no_queda_nada_a_medias(): void
@@ -186,11 +186,11 @@ class PosTest extends TestCase
         ConfiguracionNegocio::actual()->update(['permitir_stock_negativo' => false]);
         $this->actuarComo('cajero');
 
-        $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 101]], $this->efectivo(20))->assertStatus(422);
+        $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 101]], $this->efectivo(20))->assertStatus(422);
 
         $this->assertSame(0, Venta::count());
         $this->assertSame(0, MovimientoCaja::count());
-        $this->assertEquals(100, $this->stock($this->pan));
+        $this->assertEquals(100, $this->stock($this->latteHelado));
     }
 
     public function test_producto_que_permite_vender_sin_existencia_queda_en_negativo(): void
@@ -208,7 +208,7 @@ class PosTest extends TestCase
         $this->assertEquals(-2, $this->stock($coca));
 
         // Los demás productos siguen bloqueados
-        $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 101]], $this->efectivo(20))->assertStatus(422);
+        $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 101]], $this->efectivo(20))->assertStatus(422);
 
         // Y la Coca-Cola solo se pasa al venderla: una merma o salida a mano sigue bloqueada
         $this->expectException(\App\Exceptions\NegocioException::class);
@@ -222,7 +222,7 @@ class PosTest extends TestCase
         $this->actuarComo('cajero');
 
         $this->vender(
-            [['producto_id' => $this->pastel->id, 'cantidad' => 1, 'descuento_tipo' => 'porcentaje', 'descuento_valor' => 10]],
+            [['producto_id' => $this->frappe->id, 'cantidad' => 1, 'descuento_tipo' => 'porcentaje', 'descuento_valor' => 10]],
             $this->efectivo(9)
         )->assertCreated()->assertJsonPath('venta.total', 9)->assertJsonPath('venta.descuento_total', 1);
     }
@@ -231,7 +231,7 @@ class PosTest extends TestCase
     {
         $admin = $this->crearUsuario('admin', ['nombre' => 'Gerente']);
         $this->actuarComo('cajero');
-        $items = [['producto_id' => $this->pastel->id, 'cantidad' => 1]];
+        $items = [['producto_id' => $this->frappe->id, 'cantidad' => 1]];
         $global = ['descuento_global' => ['tipo' => 'monto', 'valor' => 3]];
 
         $this->vender($items, $this->efectivo(7), $global)
@@ -254,7 +254,7 @@ class PosTest extends TestCase
     {
         $admin = $this->crearUsuario('admin');
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 10]], $this->efectivo(5))->json('venta.id');
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 10]], $this->efectivo(5))->json('venta.id');
 
         $this->postJson("/api/pos/ventas/{$id}/anular", ['motivo' => 'Cobro equivocado'])
             ->assertStatus(403)->assertJsonPath('permiso', 'pos.anular');
@@ -263,7 +263,7 @@ class PosTest extends TestCase
         $this->postJson("/api/pos/ventas/{$id}/anular", ['motivo' => 'Cobro equivocado'])
             ->assertOk()->assertJsonPath('venta.estado', 'anulada');
 
-        $this->assertEquals(100, $this->stock($this->pan));
+        $this->assertEquals(100, $this->stock($this->latteHelado));
         $this->assertEquals(20, $this->esperado());
         $this->assertDatabaseHas('auditorias', ['accion' => 'anular_venta', 'descripcion' => 'Cobro equivocado']);
 
@@ -273,7 +273,7 @@ class PosTest extends TestCase
     public function test_no_se_anula_una_venta_de_un_turno_cerrado(): void
     {
         $this->actuarComo('admin');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 1]], $this->efectivo(1))->json('venta.id');
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 1]], $this->efectivo(1))->json('venta.id');
         CajaService::cerrar($this->turno, null, 20.15, auth()->id());
 
         $this->postJson("/api/pos/ventas/{$id}/anular", ['motivo' => 'Tarde'])->assertStatus(422);
@@ -284,32 +284,32 @@ class PosTest extends TestCase
     public function test_devolucion_parcial_reparte_el_descuento_y_devuelve_stock(): void
     {
         $this->actuarComo('admin');
-        // 10 panes a $0.15 con 10% de descuento global = $1.35 (cada pan efectivamente a $0.135)
+        // 10 lattes helados a $0.15 con 10% de descuento global = $1.35 (cada latte efectivamente a $0.135)
         $venta = $this->vender(
-            [['producto_id' => $this->pan->id, 'cantidad' => 10]],
+            [['producto_id' => $this->latteHelado->id, 'cantidad' => 10]],
             $this->efectivo(2),
             ['descuento_global' => ['tipo' => 'porcentaje', 'valor' => 10]]
         )->json('venta');
         $detalleId = $venta['detalles'][0]['id'];
 
         $devolver = fn (float $cantidad, bool $reingresa = true) => $this->postJson("/api/pos/ventas/{$venta['id']}/devoluciones", [
-            'uuid' => (string) Str::uuid(), 'caja_id' => $this->caja->id, 'motivo' => 'Pan quemado',
+            'uuid' => (string) Str::uuid(), 'caja_id' => $this->caja->id, 'motivo' => 'Latte quemado',
             'items' => [['venta_detalle_id' => $detalleId, 'cantidad' => $cantidad, 'reingresa_inventario' => $reingresa]],
         ]);
 
         $devolver(4)->assertCreated()->assertJsonPath('devolucion.total', 0.54);
-        $this->assertEquals(94, $this->stock($this->pan));
+        $this->assertEquals(94, $this->stock($this->latteHelado));
         $this->assertEquals(20.81, $this->esperado()); // 20 + 1.35 - 0.54
 
         $devolver(7)->assertStatus(422);                // solo quedan 6
         $devolver(6, false)->assertCreated()->assertJsonPath('venta.estado', 'devuelta');
-        $this->assertEquals(94, $this->stock($this->pan)); // lo dañado no reingresa
+        $this->assertEquals(94, $this->stock($this->latteHelado)); // lo dañado no reingresa
     }
 
     public function test_cajero_no_puede_devolver(): void
     {
         $this->actuarComo('cajero');
-        $venta = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 2]], $this->efectivo(1))->json('venta');
+        $venta = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 2]], $this->efectivo(1))->json('venta');
 
         $this->postJson("/api/pos/ventas/{$venta['id']}/devoluciones", [
             'uuid' => (string) Str::uuid(), 'caja_id' => $this->caja->id, 'motivo' => 'x',
@@ -325,19 +325,19 @@ class PosTest extends TestCase
 
         $pedido = $this->postJson('/api/pos/pedidos', [
             'uuid' => (string) Str::uuid(), 'nombre' => 'Mesa 2', 'caja_id' => $this->caja->id,
-            'items' => [['producto_id' => $this->pan->id, 'cantidad' => 4, 'notas' => 'tostado']],
+            'items' => [['producto_id' => $this->latteHelado->id, 'cantidad' => 4, 'notas' => 'tostado']],
         ])->assertCreated()->assertJsonPath('pedido.total', 0.6)->json('pedido');
 
         // Guardar la precuenta no mueve inventario
-        $this->assertEquals(100, $this->stock($this->pan));
+        $this->assertEquals(100, $this->stock($this->latteHelado));
         $this->assertCount(1, $this->getJson('/api/pos/pedidos')->json('pedidos'));
 
-        $venta = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 4]], $this->efectivo(1), ['pedido_id' => $pedido['id']])
+        $venta = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 4]], $this->efectivo(1), ['pedido_id' => $pedido['id']])
             ->assertCreated()->json('venta');
         $this->assertSame('cobrado', Pedido::find($pedido['id'])->estado);
         $this->assertCount(0, $this->getJson('/api/pos/pedidos')->json('pedidos'));
 
-        $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 4]], $this->efectivo(1), ['pedido_id' => $pedido['id']])
+        $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 4]], $this->efectivo(1), ['pedido_id' => $pedido['id']])
             ->assertStatus(422);
 
         $this->postJson("/api/pos/ventas/{$venta['id']}/anular", ['motivo' => 'Error'])->assertOk();
@@ -349,7 +349,7 @@ class PosTest extends TestCase
         $this->actuarComo('cajero');
         $id = $this->postJson('/api/pos/pedidos', [
             'uuid' => (string) Str::uuid(), 'nombre' => 'Sra. Ana',
-            'items' => [['producto_id' => $this->pan->id, 'cantidad' => 1]],
+            'items' => [['producto_id' => $this->latteHelado->id, 'cantidad' => 1]],
         ])->json('pedido.id');
 
         $this->postJson("/api/pos/pedidos/{$id}/cancelar", [])->assertStatus(422);
@@ -361,23 +361,23 @@ class PosTest extends TestCase
 
     public function test_catalogo_trae_solo_lo_que_se_vende_y_sus_categorias(): void
     {
-        $panes = Categoria::create(['nombre' => 'Panes', 'estado' => true]);
+        $heladas = Categoria::create(['nombre' => 'Bebidas heladas', 'estado' => true]);
         Categoria::create(['nombre' => 'Vacía', 'estado' => true]);
-        $this->pan->categorias()->sync([$panes->id]);
-        $this->producto(['nombre' => 'Harina', 'precio_venta' => 0, 'se_vende' => false, 'clase' => 'materia_prima', 'unidad_medida_id' => $this->pan->unidad_medida_id], 50);
+        $this->latteHelado->categorias()->sync([$heladas->id]);
+        $this->producto(['nombre' => 'Café molido', 'precio_venta' => 0, 'se_vende' => false, 'clase' => 'materia_prima', 'unidad_medida_id' => $this->latteHelado->unidad_medida_id], 50);
 
         $this->actuarComo('cajero');
         $res = $this->getJson('/api/pos/catalogo')->assertOk();
 
-        $this->assertEqualsCanonicalizing(['Pan francés', 'Decoración', 'Queso'], array_column($res->json('productos'), 'nombre'));
-        $this->assertSame(['Panes'], array_column($res->json('categorias'), 'nombre'));
+        $this->assertEqualsCanonicalizing(['Latte helado', 'Decoración', 'Queso'], array_column($res->json('productos'), 'nombre'));
+        $this->assertSame(['Bebidas heladas'], array_column($res->json('categorias'), 'nombre'));
     }
 
     public function test_historial_por_turno_excluye_anuladas_del_total(): void
     {
         $this->actuarComo('admin');
-        $this->vender([['producto_id' => $this->pastel->id, 'cantidad' => 1]], $this->efectivo(10));
-        $id = $this->vender([['producto_id' => $this->pastel->id, 'cantidad' => 2]], $this->efectivo(20))->json('venta.id');
+        $this->vender([['producto_id' => $this->frappe->id, 'cantidad' => 1]], $this->efectivo(10));
+        $id = $this->vender([['producto_id' => $this->frappe->id, 'cantidad' => 2]], $this->efectivo(20))->json('venta.id');
         $this->postJson("/api/pos/ventas/{$id}/anular", ['motivo' => 'Error'])->assertOk();
 
         $this->getJson("/api/pos/ventas?turno_id={$this->turno->id}")
@@ -390,7 +390,7 @@ class PosTest extends TestCase
     public function test_ventas_aparecen_por_empleado_en_el_turno(): void
     {
         $this->actuarComo('cajero', ['nombre' => 'Ana']);
-        $this->vender([['producto_id' => $this->pastel->id, 'cantidad' => 1]], $this->efectivo(10))->assertCreated();
+        $this->vender([['producto_id' => $this->frappe->id, 'cantidad' => 1]], $this->efectivo(10))->assertCreated();
 
         $resumen = CajaService::resumen($this->turno);
         $this->assertSame('Ana', $resumen['ventas_por_usuario'][0]['usuario']);

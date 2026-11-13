@@ -27,7 +27,7 @@ class ImpresionColaTest extends TestCase
     protected bool $turnoSigueAlUsuario = true;
 
     private Caja $caja;
-    private Producto $pan;
+    private Producto $latteHelado;
 
     protected function setUp(): void
     {
@@ -43,9 +43,9 @@ class ImpresionColaTest extends TestCase
         });
 
         $this->caja = Caja::first();
-        $this->pan = Producto::create(['nombre' => 'Pan francés', 'tipo' => 'bien', 'clase' => 'producto_terminado', 'precio_venta' => 0.15,
+        $this->latteHelado = Producto::create(['nombre' => 'Latte helado', 'tipo' => 'bien', 'clase' => 'producto_terminado', 'precio_venta' => 0.15,
             'unidad_medida_id' => UnidadesMedida::where('nombre', 'Unidad')->value('id')]);
-        Inventario::create(['producto_id' => $this->pan->id, 'stock_actual' => 100]);
+        Inventario::create(['producto_id' => $this->latteHelado->id, 'stock_actual' => 100]);
         CajaService::abrir($this->caja->id, 20, $this->crearUsuario('cajero')->id);
     }
 
@@ -62,7 +62,7 @@ class ImpresionColaTest extends TestCase
     {
         return $this->postJson('/api/pos/ventas', [
             'uuid' => (string) Str::uuid(), 'caja_id' => $this->caja->id,
-            'items' => [['producto_id' => $this->pan->id, 'cantidad' => 2]],
+            'items' => [['producto_id' => $this->latteHelado->id, 'cantidad' => 2]],
             'pagos' => [['metodo_pago_id' => MetodoPago::where('nombre', 'Efectivo')->value('id'), 'monto' => 1]],
         ])->assertCreated()->json('venta');
     }
@@ -90,7 +90,7 @@ class ImpresionColaTest extends TestCase
         $this->assertSame('192.168.1.69', $cola[0]['ip']);
         $this->assertSame(9100, $cola[0]['puerto']);
         $this->assertSame($trabajo->contenido, $cola[0]['bytes']);
-        $this->assertStringContainsString('Pan francés', mb_convert_encoding(base64_decode($cola[0]['bytes']), 'UTF-8', 'CP850'));
+        $this->assertStringContainsString('Latte helado', mb_convert_encoding(base64_decode($cola[0]['bytes']), 'UTF-8', 'CP850'));
 
         // Mientras la primera lo imprime, otra tablet no lo recibe
         $this->assertSame([], $this->tomar('tablet-salon'));

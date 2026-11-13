@@ -58,7 +58,7 @@ class CategoriasTest extends TestCase
         $this->seed(UnidadesMedidaSeeder::class);
         $usada = UnidadesMedida::first();
         Producto::create([
-            'nombre' => 'Harina', 'tipo' => 'bien', 'clase' => 'materia_prima',
+            'nombre' => 'Café molido', 'tipo' => 'bien', 'clase' => 'materia_prima',
             'precio_venta' => 0, 'costo_unitario' => 1, 'unidad_medida_id' => $usada->id,
         ]);
         $libre = UnidadesMedida::create(['nombre' => 'Bandeja', 'abreviatura' => 'band', 'tipo' => 'unidad', 'factor_base' => 1, 'estado' => true]);

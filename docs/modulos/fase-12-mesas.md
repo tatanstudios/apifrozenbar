@@ -104,7 +104,7 @@ Punto de venta por terminales, al estilo de KOLO. Decisiones del dueño:
 
 **Navegador:**
 1. Se abrió MESA 2.
-2. Se agregaron un Frappuccino con leche deslactosada y caramelo ($3.90), un sándwich (cocina) y pan (se entrega directo).
+2. Se agregaron un Frappuccino con leche deslactosada y caramelo ($3.90), un sándwich (cocina) y una botella de agua (se entrega directo).
 3. Al enviar, salió la comanda #000001 en Cocina y Barra.
 4. En la pantalla de cocina se marcó el sándwich como terminado, y el mapa mostró «1 listo para servir».
 5. Se separó el frappé en una segunda cuenta y se cobró cada cuenta: T-000010 por $4.15 y T-000011 por $3.90 con cambio de $1.10. La mesa quedó libre.
@@ -129,7 +129,7 @@ Punto de venta por terminales, al estilo de KOLO. Decisiones del dueño:
 - **Prueba:** `MesasTest::test_cada_area_imprime_su_propio_ticket_aunque_haya_una_sola_impresora`.
 
 **Todo sale en comanda (2026-11-02).**
-- Ya no existe «Se entrega directo». Cada categoría debe tener un área (Configuración › Mesas y cocina › Áreas exige elegirla). Si el pan de vitrina lo despacha otra persona, se crea un área para ella.
+- Ya no existe «Se entrega directo». Cada categoría debe tener un área (Configuración › Mesas y cocina › Áreas exige elegirla). Si el postre de vitrina lo despacha otra persona, se crea un área para ella.
 - Lo que no tiene área (producto sin categoría o categoría sin área) sale igual, en una **comanda general** con el encabezado «COMANDA», en la impresora de comandas o, si no hay, en la de tickets.
 - Vale para mesas, venta rápida de mostrador y precuentas.
 - El formulario del producto muestra a qué comanda va («Comanda: Barra») o avisa que saldrá en la general.

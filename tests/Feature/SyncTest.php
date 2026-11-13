@@ -20,7 +20,7 @@ class SyncTest extends TestCase
 {
     private Caja $caja;
     private TurnoCaja $turno;
-    private Producto $pan;
+    private Producto $latteHelado;
 
     protected function setUp(): void
     {
@@ -28,12 +28,12 @@ class SyncTest extends TestCase
         $this->seed([CajaSeeder::class, UnidadesMedidaSeeder::class]);
 
         $this->caja = Caja::first();
-        $this->pan = Producto::create([
-            'nombre' => 'Pan francés', 'tipo' => 'bien', 'clase' => 'producto_terminado',
+        $this->latteHelado = Producto::create([
+            'nombre' => 'Latte helado', 'tipo' => 'bien', 'clase' => 'producto_terminado',
             'precio_venta' => 0.15, 'costo_unitario' => 0.05,
             'unidad_medida_id' => UnidadesMedida::where('nombre', 'Unidad')->value('id'),
         ]);
-        Inventario::create(['producto_id' => $this->pan->id, 'stock_actual' => 20]);
+        Inventario::create(['producto_id' => $this->latteHelado->id, 'stock_actual' => 20]);
         $this->turno = CajaService::abrir($this->caja->id, 20, $this->crearUsuario('cajero')->id);
     }
 
@@ -45,7 +45,7 @@ class SyncTest extends TestCase
             'turno_id'           => $this->turno->id,
             'numero_provisional' => 'OFF-1-000001',
             'fecha_venta'        => now()->subMinutes(30)->toIso8601String(),
-            'items'              => [['producto_id' => $this->pan->id, 'cantidad' => 10, 'precio_unitario' => 0.15]],
+            'items'              => [['producto_id' => $this->latteHelado->id, 'cantidad' => 10, 'precio_unitario' => 0.15]],
             'pagos'              => [['metodo_pago_id' => MetodoPago::where('nombre', 'Efectivo')->value('id'), 'monto' => 2]],
         ], $cambios);
     }
@@ -70,7 +70,7 @@ class SyncTest extends TestCase
         $this->assertSame('OFF-1-000001', $venta->numero_provisional);
         $this->assertNotNull($venta->sincronizada_at);
         $this->assertTrue($venta->fecha_venta->lt(now()->subMinutes(29)));
-        $this->assertEquals(10, (float) Inventario::where('producto_id', $this->pan->id)->value('stock_actual'));
+        $this->assertEquals(10, (float) Inventario::where('producto_id', $this->latteHelado->id)->value('stock_actual'));
         $this->assertEquals(21.5, CajaService::resumen($this->turno)['efectivo_esperado']);
     }
 
@@ -99,7 +99,7 @@ class SyncTest extends TestCase
     public function test_se_respeta_el_precio_cobrado_y_se_anota_el_cambio(): void
     {
         $this->actuarComo('cajero');
-        $this->pan->update(['precio_venta' => 0.20]); // subió mientras no había conexión
+        $this->latteHelado->update(['precio_venta' => 0.20]); // subió mientras no había conexión
 
         $res = $this->sync($this->ventaOffline());
 
@@ -114,19 +114,19 @@ class SyncTest extends TestCase
         $this->actuarComo('cajero');
 
         $res = $this->sync($this->ventaOffline([
-            'items' => [['producto_id' => $this->pan->id, 'cantidad' => 25, 'precio_unitario' => 0.15]],
+            'items' => [['producto_id' => $this->latteHelado->id, 'cantidad' => 25, 'precio_unitario' => 0.15]],
             'pagos' => [['metodo_pago_id' => MetodoPago::where('nombre', 'Efectivo')->value('id'), 'monto' => 5]],
         ]));
 
         $res->assertJsonPath('resultados.0.estado', 'creada');
         $this->assertStringContainsString('no había existencia suficiente (quedó en -5)', $res->json('resultados.0.conflictos.0'));
-        $this->assertEquals(-5, (float) Inventario::where('producto_id', $this->pan->id)->value('stock_actual'));
+        $this->assertEquals(-5, (float) Inventario::where('producto_id', $this->latteHelado->id)->value('stock_actual'));
     }
 
     public function test_producto_desactivado_mientras_tanto_se_acepta(): void
     {
         $this->actuarComo('cajero');
-        $this->pan->update(['activo' => false]);
+        $this->latteHelado->update(['activo' => false]);
 
         $res = $this->sync($this->ventaOffline());
 
@@ -217,23 +217,23 @@ class SyncTest extends TestCase
     public function test_venta_offline_con_extras_respeta_su_precio_y_los_muestra(): void
     {
         $this->actuarComo('admin');
-        $this->pan->update(['controla_stock' => true, 'se_vende' => true, 'activo' => true]);
+        $this->latteHelado->update(['controla_stock' => true, 'se_vende' => true, 'activo' => true]);
         $grupo = \App\Models\GrupoModificador::create(['nombre' => 'Relleno']);
-        $grupo->productos()->attach($this->pan->id);
+        $grupo->productos()->attach($this->latteHelado->id);
         $queso = \App\Models\Modificador::create(['grupo_id' => $grupo->id, 'nombre' => 'Queso', 'precio' => 0.10]);
 
-        // 10 panes con queso a $0.25 c/u: sin conflicto de precio, el nombre lleva el extra y la nota
+        // 10 lattes helados con queso a $0.25 c/u: sin conflicto de precio, el nombre lleva el extra y la nota
         $this->sync($this->ventaOffline(['items' => [[
-            'producto_id' => $this->pan->id, 'cantidad' => 10, 'precio_unitario' => 0.25,
+            'producto_id' => $this->latteHelado->id, 'cantidad' => 10, 'precio_unitario' => 0.25,
             'modificadores' => [$queso->id], 'notas' => 'tostados',
         ]], 'pagos' => [['metodo_pago_id' => MetodoPago::where('nombre', 'Efectivo')->value('id'), 'monto' => 3]]]))
             ->assertJsonPath('resultados.0.estado', 'creada')->assertJsonPath('resultados.0.conflictos', []);
-        $this->assertSame('Pan francés (Queso) · tostados', Venta::first()->detalles()->first()->nombre_producto);
+        $this->assertSame('Latte helado (Queso) · tostados', Venta::first()->detalles()->first()->nombre_producto);
 
         // Si el extra ya no existe al sincronizar, la venta entra igual y queda el aviso
         $queso->update(['activo' => false]);
         $res = $this->sync($this->ventaOffline(['numero_provisional' => 'OFF-1-000002', 'items' => [[
-            'producto_id' => $this->pan->id, 'cantidad' => 1, 'precio_unitario' => 0.25, 'modificadores' => [$queso->id],
+            'producto_id' => $this->latteHelado->id, 'cantidad' => 1, 'precio_unitario' => 0.25, 'modificadores' => [$queso->id],
         ]]]))->assertJsonPath('resultados.0.estado', 'creada');
         $this->assertStringContainsString('se registró sin extras', implode(' ', $res->json('resultados.0.conflictos')));
     }

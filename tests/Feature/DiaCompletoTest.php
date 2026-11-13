@@ -32,15 +32,15 @@ use Tests\TestCase;
  *
  * Guion (precios sin IVA):
  *  1. Ana (mesera) abre turno con $20.00.
- *  2. Venta rápida: 10 panes + 2 limonadas = $3.50, paga con $5.00 (cambio $1.50).
- *  3. Venta rápida: 1 pastel $12.00 con tarjeta (se anula más tarde con PIN).
+ *  2. Venta rápida: 10 lattes helados + 2 limonadas = $3.50, paga con $5.00 (cambio $1.50).
+ *  3. Venta rápida: 1 frappé $12.00 con tarjeta (se anula más tarde con PIN).
  *  4. Mostrador: pedido de «Juan», café con leche + sándwich = $5.00, efectivo.
  *  5. Mesa 1: 3 sándwiches, 2 limonadas, 1 café con leche; se envía; se cancela 1 sándwich con PIN;
  *     el café pasa a otra cuenta. Cuenta 1 ($9.00): $5.00 efectivo + $4.00 tarjeta.
  *     Cuenta 2 ($1.50) con descuento de $0.50 autorizado: $1.00 efectivo.
  *  6. Mesa 2: 1 sándwich, se envía, se anula la comanda con PIN y se libera la mesa.
- *  7. Se anula la venta del pastel (PIN).
- *  8. Devolución de 2 panes de la primera venta ($0.30 en efectivo, regresan al inventario).
+ *  7. Se anula la venta del frappé (PIN).
+ *  8. Devolución de 2 lattes helados de la primera venta ($0.30 en efectivo, regresan al inventario).
  *  9. Cena del personal (consumo interno, $0.00): 2 huevos.
  * 10. Gasto de gas desde la caja: $2.00.
  * 11. Cierre: se cuentan $32.00 (esperado $32.20 → faltante $0.20).
@@ -66,11 +66,11 @@ class DiaCompletoTest extends TestCase
 
         $barra = Categoria::create(['nombre' => 'Bebidas', 'estado' => true, 'area_preparacion_id' => AreaPreparacion::where('nombre', 'Barra')->value('id')]);
         $cocina = Categoria::create(['nombre' => 'Comida', 'estado' => true, 'area_preparacion_id' => AreaPreparacion::where('nombre', 'Cocina')->value('id')]);
-        $panes = Categoria::create(['nombre' => 'Pan', 'estado' => true]);
+        $heladas = Categoria::create(['nombre' => 'Bebidas heladas', 'estado' => true]);
 
         // Con existencia propia
-        $this->p['pan'] = $this->conStock('Pan francés', 'producto_terminado', 0.15, 0.05, 200, 0, $panes);
-        $this->p['pastel'] = $this->conStock('Pastel', 'producto_terminado', 12.00, 5.00, 4, 2, $panes);
+        $this->p['helado'] = $this->conStock('Latte helado', 'producto_terminado', 0.15, 0.05, 200, 0, $heladas);
+        $this->p['frappe'] = $this->conStock('Frappé', 'producto_terminado', 12.00, 5.00, 4, 2, $heladas);
         // Insumos
         $this->p['limon'] = $this->conStock('Limón', 'materia_prima', 0, 0.05, 30, 20);
         $this->p['azucar'] = $this->conStock('Azúcar', 'materia_prima', 0, 0.002, 5000, 1000, null, 'Gramo');
@@ -155,16 +155,16 @@ class DiaCompletoTest extends TestCase
         // ── 2. Venta rápida en efectivo con cambio ──
         $v1 = $this->postJson('/api/pos/ventas', [
             'uuid' => $this->uuid(), 'caja_id' => $this->caja->id,
-            'items' => [$this->item('pan', 10), $this->item('limonada', 2)],
+            'items' => [$this->item('helado', 10), $this->item('limonada', 2)],
             'pagos' => [['metodo_pago_id' => $this->efectivo, 'monto' => 5.00]],
         ])->assertCreated()->json('venta');
         $this->assertEquals(3.50, $v1['total']);
         $this->assertEquals(1.50, $v1['cambio'] ?? null, 'El ticket debe indicar el cambio');
 
-        // ── 3. Pastel con tarjeta ──
+        // ── 3. Frappé con tarjeta ──
         $v2 = $this->postJson('/api/pos/ventas', [
             'uuid' => $this->uuid(), 'caja_id' => $this->caja->id,
-            'items' => [$this->item('pastel', 1)],
+            'items' => [$this->item('frappe', 1)],
             'pagos' => [['metodo_pago_id' => $this->tarjeta, 'monto' => 12.00]],
         ])->assertCreated()->json('venta');
 
@@ -223,15 +223,15 @@ class DiaCompletoTest extends TestCase
         $this->postJson("/api/mesas/ordenes/{$orden2['id']}/cerrar", [])->assertOk();
         $this->assertSame('cancelada', Orden::find($orden2['id'])->estado, 'Sin nada cobrado, la orden queda cancelada y la mesa libre');
 
-        // ── 7. Anular el pastel ──
+        // ── 7. Anular el frappé ──
         $this->postJson("/api/pos/ventas/{$v2['id']}/anular", ['motivo' => 'Cobro equivocado'])->assertStatus(403);
         $this->postJson("/api/pos/ventas/{$v2['id']}/anular", ['motivo' => 'Cobro equivocado', 'autorizacion' => '4321'])->assertOk();
 
-        // ── 8. Devolución de 2 panes ──
-        $detallePan = collect($v1['detalles'])->firstWhere('producto_id', $this->p['pan']->id)['id'];
+        // ── 8. Devolución de 2 lattes helados ──
+        $detalleLatte = collect($v1['detalles'])->firstWhere('producto_id', $this->p['helado']->id)['id'];
         $this->postJson("/api/pos/ventas/{$v1['id']}/devoluciones", [
-            'uuid' => $this->uuid(), 'caja_id' => $this->caja->id, 'motivo' => 'Pan duro', 'autorizacion' => '4321',
-            'items' => [['venta_detalle_id' => $detallePan, 'cantidad' => 2, 'reingresa_inventario' => true]],
+            'uuid' => $this->uuid(), 'caja_id' => $this->caja->id, 'motivo' => 'Café frío', 'autorizacion' => '4321',
+            'items' => [['venta_detalle_id' => $detalleLatte, 'cantidad' => 2, 'reingresa_inventario' => true]],
         ])->assertCreated();
 
         // ── 9. Cena del personal ──
@@ -255,7 +255,7 @@ class DiaCompletoTest extends TestCase
         $this->assertEquals(0.30, $resumen['totales']['devoluciones']);
         $this->assertEquals(2.00, $resumen['totales']['egresos']);
         $tarjeta = collect($resumen['por_metodo'])->firstWhere('nombre', 'Tarjeta');
-        $this->assertEquals(4.00, $tarjeta['neto'], 'La tarjeta del pastel anulado no cuenta');
+        $this->assertEquals(4.00, $tarjeta['neto'], 'La tarjeta del frappé anulado no cuenta');
 
         // ── 11. Cierre con faltante ──
         $cierre = $this->postJson("/api/caja/turnos/{$turnoId}/cerrar", ['efectivo_contado' => 32.00])->assertOk()->json();
@@ -276,15 +276,15 @@ class DiaCompletoTest extends TestCase
         $this->assertEquals(6, (float) $consumo['Huevo']['vendido']);
 
         // ── Inventario ──
-        $this->assertEquals(192, $this->stock('pan'), 'Pan: 200 − 10 + 2 devueltos');
-        $this->assertEquals(4, $this->stock('pastel'), 'Pastel: vendido y anulado');
+        $this->assertEquals(192, $this->stock('helado'), 'Latte helado: 200 − 10 + 2 devueltos');
+        $this->assertEquals(4, $this->stock('frappe'), 'Frappé: vendido y anulado');
         $this->assertEquals(14, $this->stock('limon'), 'Limón: 4 limonadas × 4');
         $this->assertEquals(4860, $this->stock('azucar'), 'Azúcar: 4 × 30 g + 2 × 10 g');
         $this->assertEquals(1700, $this->stock('leche'), 'Leche: 2 cafés con leche × 150 ml');
         $this->assertEquals(22, $this->stock('huevo'), 'Huevo: 3 sándwiches cobrados + cena; no el cancelado ni la comanda anulada');
 
         // El kárdex de cada producto explica su existencia
-        $inicial = ['pan' => 200, 'pastel' => 4, 'limon' => 30, 'azucar' => 5000, 'leche' => 2000, 'huevo' => 30];
+        $inicial = ['helado' => 200, 'frappe' => 4, 'limon' => 30, 'azucar' => 5000, 'leche' => 2000, 'huevo' => 30];
         foreach ($inicial as $clave => $stockInicial) {
             $movs = MovimientoInventario::where('producto_id', $this->p[$clave]->id)->orderBy('id')->get();
             $ultimo = $movs->last();
@@ -322,8 +322,8 @@ class DiaCompletoTest extends TestCase
         $this->assertEquals(13.22, $resultados['resultado'], '15.52 − 0.30 de consumo − 2.00 de gasto');
 
         $vendidos = collect($this->getJson('/api/reportes/productos_vendidos')->assertOk()->json('reporte.filas'))->keyBy('producto');
-        $this->assertEquals(8, $vendidos['Pan francés']['cantidad'], 'Pan neto de devoluciones');
-        $this->assertArrayNotHasKey('Pastel', $vendidos->all(), 'Lo anulado no aparece');
+        $this->assertEquals(8, $vendidos['Latte helado']['cantidad'], 'Latte neto de devoluciones');
+        $this->assertArrayNotHasKey('Frappé', $vendidos->all(), 'Lo anulado no aparece');
         $this->assertArrayNotHasKey('Cena del personal', $vendidos->all(), 'El consumo interno no es una venta');
         $this->assertEquals(3, $vendidos['Sándwich']['cantidad'] ?? null, 'Sándwiches: ' . json_encode($vendidos['Sándwich'] ?? null) . ' (1 de Juan + 2 de la mesa = 3)');
 

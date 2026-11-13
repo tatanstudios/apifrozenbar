@@ -93,7 +93,7 @@ Estado: terminada el 2026-11-01. Fase anterior: [fase-6-clientes.md](fase-6-clie
 
 **Navegador:**
 1. Se creó el proveedor «Molinos de El Salvador» (plazo de 30 días).
-2. Compra C-000001 al crédito de 2 quintales de harina a $45: entraron 200 lb a $0.45/lb, con vencimiento el 01/12/2026.
+2. Compra C-000001 al crédito de 2 quintales de café molido a $45: entraron 200 lb a $0.45/lb, con vencimiento el 01/12/2026.
 3. Pago PP-000001 de $40 por transferencia (fuera de caja): el saldo bajó a $50.
 4. Las pantallas de órdenes y de cuentas por pagar muestran los datos.
 

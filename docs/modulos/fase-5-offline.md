@@ -75,7 +75,7 @@ Además:
 
 **Navegador:**
 1. Con el POS abierto se apagó el servidor de la API.
-2. Venta de 3 panes: a los 10 segundos se guardó como OFF-1-000001, con su ticket y el indicador «Sin conexión · 1 pendiente».
+2. Venta de 3 lattes helados: a los 10 segundos se guardó como OFF-1-000001, con su ticket y el indicador «Sin conexión · 1 pendiente».
 3. Segunda venta: instantánea (OFF-1-000002).
 4. Recarga de la página sin API: el POS se reconstruyó desde el dispositivo, con el stock local en 84.
 5. Al encender la API se sincronizaron solas como T-000006 y T-000007, en el turno #2, sin observaciones y con el stock correcto.
@@ -88,4 +88,4 @@ Esta prueba reveló un error, ya corregido y con su prueba: la hora del disposit
 - **Precuentas, anulaciones, devoluciones e impresión térmica:** requieren el servidor. La impresión del navegador funciona sin conexión.
 - **Abrir la app sin servidor:** solo funciona por https o localhost. Para recargar el POS sin servidor en las tabletas, conviene servir el frontend por https en la red local (por ejemplo, con un certificado de Laragon).
 - **Service worker:** no se probó en el navegador porque solo se activa en el build de producción. El resto del flujo sin conexión sí se probó.
-- **Varios dispositivos:** cada tableta guarda su propia cola. Si dos venden sin conexión el último pan, ambas ventas se aceptan y el stock queda en negativo con la observación.
+- **Varios dispositivos:** cada tableta guarda su propia cola. Si dos venden sin conexión el último café helado, ambas ventas se aceptan y el stock queda en negativo con la observación.

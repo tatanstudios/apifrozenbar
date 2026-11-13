@@ -26,7 +26,7 @@ class ComprasTest extends TestCase
     private Caja $caja;
     private TurnoCaja $turno;
     private Proveedor $proveedor;
-    private Producto $harina;   // se maneja en libras y se compra por quintal
+    private Producto $cafeMolido;   // se maneja en libras y se compra por quintal
     private Producto $huevo;    // se maneja por unidad y se compra por docena
     private int $quintal;
     private int $docena;
@@ -42,11 +42,11 @@ class ComprasTest extends TestCase
         $this->quintal = UnidadesMedida::where('nombre', 'Quintal')->value('id');
         $this->docena = UnidadesMedida::where('nombre', 'Docena')->value('id');
 
-        $this->harina = Producto::create([
-            'nombre' => 'Harina', 'tipo' => 'bien', 'clase' => 'materia_prima', 'se_vende' => false,
+        $this->cafeMolido = Producto::create([
+            'nombre' => 'Café molido', 'tipo' => 'bien', 'clase' => 'materia_prima', 'se_vende' => false,
             'permite_fraccion' => true, 'costo_unitario' => 0.40, 'unidad_medida_id' => $libra,
         ]);
-        Inventario::create(['producto_id' => $this->harina->id, 'stock_actual' => 100]);
+        Inventario::create(['producto_id' => $this->cafeMolido->id, 'stock_actual' => 100]);
 
         $this->huevo = Producto::create([
             'nombre' => 'Huevo', 'tipo' => 'bien', 'clase' => 'materia_prima', 'se_vende' => false,
@@ -76,7 +76,7 @@ class ComprasTest extends TestCase
             'tipo_documento'   => 'ccf',
             'numero_documento' => '00123',
             'condicion'        => 'credito',
-            'items'            => [['producto_id' => $this->harina->id, 'unidad_medida_id' => $this->quintal, 'cantidad' => 1, 'costo_unitario' => 50]],
+            'items'            => [['producto_id' => $this->cafeMolido->id, 'unidad_medida_id' => $this->quintal, 'cantidad' => 1, 'costo_unitario' => 50]],
         ], $extra));
     }
 
@@ -131,14 +131,14 @@ class ComprasTest extends TestCase
             ->assertJsonPath('compra.items.0.costo_base', 0.5);
 
         // 100 lb a $0.40 + 100 lb a $0.50 = promedio $0.45
-        $this->assertEquals(200, $this->stock($this->harina));
-        $this->assertEquals(0.45, (float) $this->harina->fresh()->costo_unitario);
+        $this->assertEquals(200, $this->stock($this->cafeMolido));
+        $this->assertEquals(0.45, (float) $this->cafeMolido->fresh()->costo_unitario);
 
         $cuenta = CuentaPagar::first();
         $this->assertEquals(56.5, (float) $cuenta->saldo);
         $this->assertSame(today()->addDays(30)->toDateString(), $cuenta->fecha_vencimiento->toDateString());
         $this->assertEquals(56.5, $this->saldoProveedor());
-        $this->assertDatabaseHas('movimientos_inventario', ['tipo' => 'compra', 'referencia_tipo' => 'compra', 'producto_id' => $this->harina->id]);
+        $this->assertDatabaseHas('movimientos_inventario', ['tipo' => 'compra', 'referencia_tipo' => 'compra', 'producto_id' => $this->cafeMolido->id]);
     }
 
     public function test_docena_se_convierte_a_unidades_enteras(): void
@@ -188,13 +188,13 @@ class ComprasTest extends TestCase
 
         $this->comprar([
             'condicion' => 'contado',
-            'items'     => [['producto_id' => $this->harina->id, 'unidad_medida_id' => $this->quintal, 'cantidad' => 3, 'costo_unitario' => 50]],
+            'items'     => [['producto_id' => $this->cafeMolido->id, 'unidad_medida_id' => $this->quintal, 'cantidad' => 3, 'costo_unitario' => 50]],
             'pago'      => ['origen' => 'caja', 'caja_id' => $this->caja->id],
         ])->assertStatus(422)->assertJsonPath('message', 'No hay suficiente efectivo en caja: disponible $100.00');
 
         // Todo se revierte: ni compra ni inventario
         $this->assertSame(0, Compra::count());
-        $this->assertEquals(100, $this->stock($this->harina));
+        $this->assertEquals(100, $this->stock($this->cafeMolido));
     }
 
     public function test_anular_compra_saca_el_inventario_y_su_pago_de_contado(): void
@@ -208,7 +208,7 @@ class ComprasTest extends TestCase
         $this->postJson("/api/compras/{$id}/anular", ['motivo' => 'Se registró en la caja equivocada'])->assertOk()
             ->assertJsonPath('compra.estado', 'anulada');
 
-        $this->assertEquals(100, $this->stock($this->harina));
+        $this->assertEquals(100, $this->stock($this->cafeMolido));
         $this->assertEquals(100, CajaService::resumen($this->turno)['efectivo_esperado']);
         $this->assertTrue(PagoProveedor::first()->anulado);
         $this->assertSame('anulada', CuentaPagar::first()->estado);
@@ -235,7 +235,7 @@ class ComprasTest extends TestCase
 
         $orden = $this->postJson('/api/compras/ordenes', [
             'proveedor_id' => $this->proveedor->id,
-            'items'        => [['producto_id' => $this->harina->id, 'unidad_medida_id' => $this->quintal, 'cantidad' => 4, 'costo_unitario' => 50]],
+            'items'        => [['producto_id' => $this->cafeMolido->id, 'unidad_medida_id' => $this->quintal, 'cantidad' => 4, 'costo_unitario' => 50]],
         ])->assertCreated()->assertJsonPath('orden.numero', 'OC-000001')->assertJsonPath('orden.total', 200)->json('orden');
 
         $this->postJson("/api/compras/ordenes/{$orden['id']}/enviar")->assertOk()->assertJsonPath('orden.estado', 'enviada');
@@ -244,7 +244,7 @@ class ComprasTest extends TestCase
         $recibir = fn (float $cantidad, string $doc) => $this->comprar([
             'orden_compra_id'  => $orden['id'],
             'numero_documento' => $doc,
-            'items'            => [['producto_id' => $this->harina->id, 'unidad_medida_id' => $this->quintal, 'cantidad' => $cantidad, 'costo_unitario' => 50, 'orden_detalle_id' => $linea]],
+            'items'            => [['producto_id' => $this->cafeMolido->id, 'unidad_medida_id' => $this->quintal, 'cantidad' => $cantidad, 'costo_unitario' => 50, 'orden_detalle_id' => $linea]],
         ])->assertCreated();
 
         $recibir(1, 'A-1');
@@ -368,7 +368,7 @@ class ComprasTest extends TestCase
     {
         $this->actuarComo('admin');
         $this->comprar(['numero_documento' => 'F-1']);
-        $this->comprar(['numero_documento' => 'F-2', 'items' => [['producto_id' => $this->harina->id, 'unidad_medida_id' => $this->quintal, 'cantidad' => 1, 'costo_unitario' => 55]]]);
+        $this->comprar(['numero_documento' => 'F-2', 'items' => [['producto_id' => $this->cafeMolido->id, 'unidad_medida_id' => $this->quintal, 'cantidad' => 1, 'costo_unitario' => 55]]]);
         CuentaPagar::orderBy('id')->first()->update(['fecha_vencimiento' => today()->subDays(3)]);
 
         $this->getJson('/api/cuentas-pagar?estado=vencidas')->assertOk()
@@ -377,14 +377,14 @@ class ComprasTest extends TestCase
             ->assertJsonPath('resumen.total', 105)
             ->assertJsonPath('resumen.vencido', 50);
 
-        $this->getJson("/api/compras/historial-producto/{$this->harina->id}")->assertOk()
+        $this->getJson("/api/compras/historial-producto/{$this->cafeMolido->id}")->assertOk()
             ->assertJsonCount(2, 'compras')
             ->assertJsonPath('compras.0.costo_base', 0.55);
 
         $this->getJson("/api/compras/proveedores/{$this->proveedor->id}")->assertOk()
             ->assertJsonPath('resumen.compras', 2)
             ->assertJsonPath('resumen.vencido', 50)
-            ->assertJsonPath('productos.0.nombre', 'Harina');
+            ->assertJsonPath('productos.0.nombre', 'Café molido');
     }
 
     public function test_permisos_de_compras(): void

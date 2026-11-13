@@ -381,18 +381,18 @@ class RecetasVentaTest extends TestCase
     public function test_servicio_con_insumos_y_anulacion_que_los_devuelve(): void
     {
         $this->actuarComo('admin');
-        $pastel = $this->insumo('Pastel pequeño', 'Unidad', 4, 3, 0);
-        $gorro = $this->insumo('Gorro de cumpleaños', 'Unidad', 0.25, 10, 0);
-        $mananitas = $this->plato('Cantar las mañanitas', 3.00);
-        $this->receta($mananitas, [[$pastel, 'Unidad', 1], [$gorro, 'Unidad', 1]])->assertCreated();
+        $frappe = $this->insumo('Frappé pequeño', 'Unidad', 4, 3, 0);
+        $vela = $this->insumo('Vela de cumpleaños', 'Unidad', 0.25, 10, 0);
+        $combo = $this->plato('Combo de cumpleaños', 3.00);
+        $this->receta($combo, [[$frappe, 'Unidad', 1], [$vela, 'Unidad', 1]])->assertCreated();
 
-        $id = $this->vender([[$mananitas, 1]], 3)->assertCreated()->assertJsonPath('venta.total', 3)->json('venta.id');
-        $this->assertEquals(2, $this->stock($pastel));
-        $this->assertEquals(9, $this->stock($gorro));
+        $id = $this->vender([[$combo, 1]], 3)->assertCreated()->assertJsonPath('venta.total', 3)->json('venta.id');
+        $this->assertEquals(2, $this->stock($frappe));
+        $this->assertEquals(9, $this->stock($vela));
 
         $this->postJson("/api/pos/ventas/{$id}/anular", ['motivo' => 'No se cantó'])->assertOk();
-        $this->assertEquals(3, $this->stock($pastel));
-        $this->assertEquals(10, $this->stock($gorro));
+        $this->assertEquals(3, $this->stock($frappe));
+        $this->assertEquals(10, $this->stock($vela));
     }
 
     public function test_insumo_insuficiente_rechaza_la_venta_sin_dejar_rastro(): void

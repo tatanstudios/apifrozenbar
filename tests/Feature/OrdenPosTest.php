@@ -22,29 +22,29 @@ class OrdenPosTest extends TestCase
     public function test_ordenar_arrastrando_reparte_las_posiciones_de_la_categoria(): void
     {
         $this->seed(UnidadesMedidaSeeder::class);
-        $pan = Categoria::create(['nombre' => 'Pan', 'estado' => true]);
+        $heladas = Categoria::create(['nombre' => 'Bebidas heladas', 'estado' => true]);
         $bebidas = Categoria::create(['nombre' => 'Bebidas', 'estado' => true]);
 
         // Empatados en 0: se numeran de 10 en 10
-        $frances = $this->producto('Pan francés', $pan);
-        $semita = $this->producto('Semita', $pan);
-        $dulce = $this->producto('Pan dulce', $pan);
+        $latteHelado = $this->producto('Latte helado', $heladas);
+        $te = $this->producto('Té helado', $heladas);
+        $capuchino = $this->producto('Capuchino', $heladas);
 
         $this->actuarComo('admin');
-        $this->putJson('/api/productos/orden-pos', ['ids' => [$semita->id, $frances->id, $dulce->id]])->assertOk();
-        $this->assertSame([10, 20, 30], [$semita->fresh()->orden_pos, $frances->fresh()->orden_pos, $dulce->fresh()->orden_pos]);
+        $this->putJson('/api/productos/orden-pos', ['ids' => [$te->id, $latteHelado->id, $capuchino->id]])->assertOk();
+        $this->assertSame([10, 20, 30], [$te->fresh()->orden_pos, $latteHelado->fresh()->orden_pos, $capuchino->fresh()->orden_pos]);
 
         // Con posiciones distintas se reusan las mismas: la categoría no se mueve respecto de las otras
         $cafe = $this->producto('Café', $bebidas, 15);
-        $this->putJson('/api/productos/orden-pos', ['ids' => [$dulce->id, $semita->id, $frances->id]])->assertOk();
-        $this->assertSame([10, 20, 30], [$dulce->fresh()->orden_pos, $semita->fresh()->orden_pos, $frances->fresh()->orden_pos]);
+        $this->putJson('/api/productos/orden-pos', ['ids' => [$capuchino->id, $te->id, $latteHelado->id]])->assertOk();
+        $this->assertSame([10, 20, 30], [$capuchino->fresh()->orden_pos, $te->fresh()->orden_pos, $latteHelado->fresh()->orden_pos]);
         $this->assertSame(15, $cafe->fresh()->orden_pos);
 
         $lista = $this->getJson('/api/productos/orden-pos')->assertOk()->assertJsonPath('paso', 10);
-        $this->assertSame(['Pan dulce', 'Café', 'Semita', 'Pan francés'], collect($lista->json('productos'))->pluck('nombre')->all());
-        $this->assertSame([$pan->id], collect($lista->json('productos'))->firstWhere('nombre', 'Semita')['categorias']);
+        $this->assertSame(['Capuchino', 'Café', 'Té helado', 'Latte helado'], collect($lista->json('productos'))->pluck('nombre')->all());
+        $this->assertSame([$heladas->id], collect($lista->json('productos'))->firstWhere('nombre', 'Té helado')['categorias']);
 
         $this->actuarComo('cajero');
-        $this->putJson('/api/productos/orden-pos', ['ids' => [$frances->id]])->assertStatus(403);
+        $this->putJson('/api/productos/orden-pos', ['ids' => [$latteHelado->id]])->assertStatus(403);
     }
 }

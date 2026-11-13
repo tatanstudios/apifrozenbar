@@ -19,7 +19,7 @@ class PermisosRutasTest extends TestCase
         $this->actuarComo('cajero');
 
         $this->getJson('/api/productos/tabla')->assertOk();
-        $this->postJson('/api/productos/registro', ['nombre' => 'Pan'])
+        $this->postJson('/api/productos/registro', ['nombre' => 'Latte'])
             ->assertStatus(403)
             ->assertJsonPath('status', 'FORBIDDEN');
     }

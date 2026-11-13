@@ -49,9 +49,9 @@ class ImpresionTest extends TestCase
     private TransporteFalso $transporte;
     private Caja $caja;
     private TurnoCaja $turno;
-    private Producto $pan;
+    private Producto $latteHelado;
     private Producto $cafe;
-    private Categoria $panes;
+    private Categoria $heladas;
     private Categoria $bebidas;
 
     protected function setUp(): void
@@ -64,14 +64,14 @@ class ImpresionTest extends TestCase
 
         $this->caja = Caja::first();
         $unidad = UnidadesMedida::where('nombre', 'Unidad')->first();
-        $this->panes = Categoria::create(['nombre' => 'Panes', 'estado' => true]);
+        $this->heladas = Categoria::create(['nombre' => 'Bebidas heladas', 'estado' => true]);
         $this->bebidas = Categoria::create(['nombre' => 'Bebidas', 'estado' => true]);
 
-        $this->pan = Producto::create(['nombre' => 'Pan francés', 'tipo' => 'bien', 'clase' => 'producto_terminado', 'precio_venta' => 0.15, 'unidad_medida_id' => $unidad->id]);
+        $this->latteHelado = Producto::create(['nombre' => 'Latte helado', 'tipo' => 'bien', 'clase' => 'producto_terminado', 'precio_venta' => 0.15, 'unidad_medida_id' => $unidad->id]);
         $this->cafe = Producto::create(['nombre' => 'Café con leche', 'tipo' => 'bien', 'clase' => 'reventa', 'precio_venta' => 1.25, 'unidad_medida_id' => $unidad->id]);
-        Inventario::create(['producto_id' => $this->pan->id, 'stock_actual' => 100]);
+        Inventario::create(['producto_id' => $this->latteHelado->id, 'stock_actual' => 100]);
         Inventario::create(['producto_id' => $this->cafe->id, 'stock_actual' => 100]);
-        $this->pan->categorias()->sync([$this->panes->id]);
+        $this->latteHelado->categorias()->sync([$this->heladas->id]);
         $this->cafe->categorias()->sync([$this->bebidas->id]);
 
         $this->turno = CajaService::abrir($this->caja->id, 20, $this->crearUsuario('cajero')->id);
@@ -99,7 +99,7 @@ class ImpresionTest extends TestCase
     {
         $this->impresora(['predeterminada' => true]);
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 10]], 'Efectivo', 5);
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 10]], 'Efectivo', 5);
 
         $this->postJson("/api/impresion/ventas/{$id}", ['caja_id' => $this->caja->id])
             ->assertOk()->assertJsonPath('impreso', true)->assertJsonPath('trabajos.0.estado', 'impreso');
@@ -109,7 +109,7 @@ class ImpresionTest extends TestCase
         $this->assertStringContainsString('Recibo', $texto);
         $this->assertStringContainsString('Nombre: Consumidor Final', $texto);
         $this->assertStringContainsString('No. de Venta: 000001', $texto);
-        $this->assertStringContainsString('Pan francés', $texto);
+        $this->assertStringContainsString('Latte helado', $texto);
         $this->assertStringContainsString('Total: $ 1.50', $texto);
         $this->assertStringContainsString('Un dólar Con Cincuenta Centavos', $texto);
         $this->assertStringContainsString('Condición de la operación: Efectivo', $texto);
@@ -128,7 +128,7 @@ class ImpresionTest extends TestCase
         ]);
         $this->impresora(['predeterminada' => true]);
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 2]], 'Efectivo', 0.30);
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 2]], 'Efectivo', 0.30);
 
         $this->postJson("/api/impresion/ventas/{$id}", ['caja_id' => $this->caja->id])->assertJsonPath('impreso', true);
 
@@ -152,7 +152,7 @@ class ImpresionTest extends TestCase
     {
         $this->impresora(['predeterminada' => true]);
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 1]], 'Efectivo', 1);
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 1]], 'Efectivo', 1);
 
         $this->postJson("/api/impresion/ventas/{$id}", ['copia' => true])->assertJsonPath('impreso', true);
 
@@ -177,7 +177,7 @@ class ImpresionTest extends TestCase
         $this->caja->update(['impresora_id' => $propia->id]);
 
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 1]], 'Efectivo', 1);
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 1]], 'Efectivo', 1);
         $this->postJson("/api/impresion/ventas/{$id}", ['caja_id' => $this->caja->id])->assertOk();
 
         $this->assertSame('Caja 1', $this->transporte->enviados[0]['impresora']);
@@ -186,7 +186,7 @@ class ImpresionTest extends TestCase
     public function test_sin_impresora_configurada_responde_con_el_motivo(): void
     {
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 1]], 'Efectivo', 1);
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 1]], 'Efectivo', 1);
 
         $this->postJson("/api/impresion/ventas/{$id}")
             ->assertStatus(422)
@@ -199,7 +199,7 @@ class ImpresionTest extends TestCase
     {
         $this->impresora(['predeterminada' => true]);
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 1]], 'Efectivo', 1);
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 1]], 'Efectivo', 1);
 
         $this->transporte->falla = true;
         $trabajoId = $this->postJson("/api/impresion/ventas/{$id}")
@@ -277,48 +277,48 @@ class ImpresionTest extends TestCase
     public function test_comandas_se_reparten_por_area(): void
     {
         $this->impresora(['predeterminada' => true]);
-        $horno = $this->impresora(['alias' => 'Horno', 'uso' => 'comanda', 'ip_impresora' => '192.168.1.60', 'cash_drawer' => 'ninguno']);
+        $areaCocina = $this->impresora(['alias' => 'Cocina', 'uso' => 'comanda', 'ip_impresora' => '192.168.1.60', 'cash_drawer' => 'ninguno']);
         $barra = $this->impresora(['alias' => 'Barra', 'uso' => 'comanda', 'ip_impresora' => '192.168.1.61', 'cash_drawer' => 'ninguno']);
-        $this->area('Cocina', $this->panes, $horno);
+        $this->area('Cocina', $this->heladas, $areaCocina);
         $this->area('Barra', $this->bebidas, $barra);
 
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 6], ['producto_id' => $this->cafe->id, 'cantidad' => 2]], 'Efectivo', 5);
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 6], ['producto_id' => $this->cafe->id, 'cantidad' => 2]], 'Efectivo', 5);
 
         $this->postJson("/api/impresion/ventas/{$id}", ['comandas' => true])->assertJsonCount(3, 'trabajos');
 
         $porImpresora = collect($this->transporte->enviados)->keyBy('impresora');
-        $horno = mb_convert_encoding($porImpresora['Horno']['bytes'], 'UTF-8', 'CP850');
+        $areaCocina = mb_convert_encoding($porImpresora['Cocina']['bytes'], 'UTF-8', 'CP850');
         $barra = mb_convert_encoding($porImpresora['Barra']['bytes'], 'UTF-8', 'CP850');
 
-        $this->assertStringContainsString('THE FROZEN', $horno);
-        $this->assertStringContainsString('6       Pan francés', $horno);
-        $this->assertStringContainsString('Solicitud de producción', $horno);
-        $this->assertStringContainsString('ORIGINAL', $horno);
-        $this->assertStringNotContainsString('Café', $horno);
+        $this->assertStringContainsString('THE FROZEN', $areaCocina);
+        $this->assertStringContainsString('6       Latte helado', $areaCocina);
+        $this->assertStringContainsString('Solicitud de producción', $areaCocina);
+        $this->assertStringContainsString('ORIGINAL', $areaCocina);
+        $this->assertStringNotContainsString('Café', $areaCocina);
         $this->assertStringContainsString('2       Café con leche', $barra);
         $this->assertStringNotContainsString('$', $barra); // la comanda no lleva precios
         // Cada ticket dice en grande de qué área es
-        $this->assertStringContainsString('** COCINA **', $horno);
+        $this->assertStringContainsString('** COCINA **', $areaCocina);
         $this->assertStringContainsString('** BARRA **', $barra);
     }
 
     public function test_producto_que_no_imprime_comanda_solo_lleva_el_ticket(): void
     {
         $this->impresora(['predeterminada' => true]);
-        $horno = $this->impresora(['alias' => 'Horno', 'uso' => 'comanda', 'ip_impresora' => '192.168.1.60', 'cash_drawer' => 'ninguno']);
+        $areaCocina = $this->impresora(['alias' => 'Cocina', 'uso' => 'comanda', 'ip_impresora' => '192.168.1.60', 'cash_drawer' => 'ninguno']);
         $barra = $this->impresora(['alias' => 'Barra', 'uso' => 'comanda', 'ip_impresora' => '192.168.1.61', 'cash_drawer' => 'ninguno']);
-        $this->area('Cocina', $this->panes, $horno);
+        $this->area('Cocina', $this->heladas, $areaCocina);
         $this->area('Barra', $this->bebidas, $barra);
         // El café está en Bebidas (área Barra) pero se entrega directo
         $this->cafe->update(['imprime_comanda' => false]);
 
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 6], ['producto_id' => $this->cafe->id, 'cantidad' => 2]], 'Efectivo', 5);
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 6], ['producto_id' => $this->cafe->id, 'cantidad' => 2]], 'Efectivo', 5);
         $this->postJson("/api/impresion/ventas/{$id}", ['comandas' => true])->assertJsonCount(2, 'trabajos'); // ticket + comanda de cocina
 
         $impresoras = collect($this->transporte->enviados)->pluck('impresora');
-        $this->assertContains('Horno', $impresoras);
+        $this->assertContains('Cocina', $impresoras);
         $this->assertNotContains('Barra', $impresoras);
         $ticket = mb_convert_encoding(collect($this->transporte->enviados)->firstWhere('impresora', 'Mostrador')['bytes'], 'UTF-8', 'CP850');
         $this->assertStringContainsString('Café con leche', $ticket); // en el ticket sí sale
@@ -336,13 +336,13 @@ class ImpresionTest extends TestCase
         $epson = $this->impresora(['alias' => 'Epson']);
 
         $this->actuarComo('cajero');
-        $venta = \App\Models\Venta::find($this->vender([['producto_id' => $this->pan->id, 'cantidad' => 2]]));
+        $venta = \App\Models\Venta::find($this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 2]]));
 
         // Star: 42 columnas en vez de 48 (marca ESC ~ 42 para StarRaster); ESC/POS: igual que siempre
         $this->assertStringContainsString("\x1B~" . chr(42), \App\Services\ImpresionService::ticket($venta, $star)->bytes());
         $this->assertStringNotContainsString("\x1B~", \App\Services\ImpresionService::ticket($venta, $epson)->bytes());
         // La comanda no cambia
-        $comanda = \App\Services\ImpresionService::comanda([['producto_id' => $this->pan->id, 'nombre' => 'Pan', 'cantidad' => 1, 'unidad' => null]], $star);
+        $comanda = \App\Services\ImpresionService::comanda([['producto_id' => $this->latteHelado->id, 'nombre' => 'Latte', 'cantidad' => 1, 'unidad' => null]], $star);
         $this->assertStringNotContainsString("\x1B~", $comanda->bytes());
 
         // La Star de 48 columnas lo dibuja igual que una de 42 (letra más grande), no a 48
@@ -355,8 +355,8 @@ class ImpresionTest extends TestCase
     public function test_configuracion_para_imprimir_sin_conexion(): void
     {
         $ticket = $this->impresora(['predeterminada' => true, 'tipo_impresion' => 'star_raster']);
-        $horno = $this->impresora(['alias' => 'Horno', 'uso' => 'comanda', 'ip_impresora' => '192.168.1.60', 'cash_drawer' => 'ninguno']);
-        $this->area('Cocina', $this->panes, $horno);
+        $areaCocina = $this->impresora(['alias' => 'Cocina', 'uso' => 'comanda', 'ip_impresora' => '192.168.1.60', 'cash_drawer' => 'ninguno']);
+        $this->area('Cocina', $this->heladas, $areaCocina);
 
         $this->actuarComo('cajero');
         $res = $this->getJson("/api/impresion/offline?caja_id={$this->caja->id}")->assertOk();
@@ -366,8 +366,8 @@ class ImpresionTest extends TestCase
             ->assertJsonPath('ticket.tipo_impresion', 'star_raster')
             ->assertJsonPath('areas.0.nombre', 'Cocina')
             ->assertJsonPath('areas.0.impresora.ip', '192.168.1.60');
-        // El pan va a cocina; el café no tiene área (solo lleva el ticket)
-        $this->assertSame($res->json('areas.0.id'), $res->json("productos.{$this->pan->id}"));
+        // El latte va a cocina; el café no tiene área (solo lleva el ticket)
+        $this->assertSame($res->json('areas.0.id'), $res->json("productos.{$this->latteHelado->id}"));
         $this->assertNull($res->json("productos.{$this->cafe->id}"));
         $this->assertNotEmpty($res->json('negocio.nombre'));
     }
@@ -375,11 +375,11 @@ class ImpresionTest extends TestCase
     public function test_cocina_y_barra_en_la_misma_impresora_salen_en_tickets_separados(): void
     {
         $unica = $this->impresora(['predeterminada' => true]);
-        $this->area('Cocina', $this->panes, $unica);
+        $this->area('Cocina', $this->heladas, $unica);
         $this->area('Barra', $this->bebidas, $unica);
 
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 6], ['producto_id' => $this->cafe->id, 'cantidad' => 2]], 'Efectivo', 5);
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 6], ['producto_id' => $this->cafe->id, 'cantidad' => 2]], 'Efectivo', 5);
         $this->postJson("/api/impresion/ventas/{$id}", ['comandas' => true])->assertJsonCount(3, 'trabajos'); // ticket + 2 comandas
 
         $comandas = collect($this->transporte->enviados)->map(fn ($e) => mb_convert_encoding($e['bytes'], 'UTF-8', 'CP850'))
@@ -389,32 +389,32 @@ class ImpresionTest extends TestCase
         $barra = $comandas->first(fn ($t) => str_contains($t, '** BARRA **'));
         $this->assertNotNull($cocina);
         $this->assertNotNull($barra);
-        $this->assertStringContainsString('Pan francés', $cocina);
+        $this->assertStringContainsString('Latte helado', $cocina);
         $this->assertStringNotContainsString('Café', $cocina);
         $this->assertStringContainsString('Café con leche', $barra);
-        $this->assertStringNotContainsString('Pan francés', $barra);
+        $this->assertStringNotContainsString('Latte helado', $barra);
     }
 
     public function test_venta_de_mostrador_sin_area_solo_imprime_el_ticket(): void
     {
         $this->impresora(['predeterminada' => true]); // solo la de tickets
         $this->actuarComo('cajero');
-        $id = $this->vender([['producto_id' => $this->pan->id, 'cantidad' => 6]], 'Efectivo', 1);
+        $id = $this->vender([['producto_id' => $this->latteHelado->id, 'cantidad' => 6]], 'Efectivo', 1);
 
-        // El pan de vitrina se entrega directo: sale el ticket de venta y ninguna comanda
+        // El postre de vitrina se entrega directo: sale el ticket de venta y ninguna comanda
         $this->postJson("/api/impresion/ventas/{$id}", ['comandas' => true])->assertJsonCount(1, 'trabajos');
         $this->assertStringNotContainsString('Solicitud de producción', $this->transporte->texto(0));
     }
 
     public function test_comandas_de_precuenta_con_notas(): void
     {
-        $horno = $this->impresora(['alias' => 'Horno', 'uso' => 'comanda', 'cash_drawer' => 'ninguno']);
-        $this->area('Cocina', $this->panes, $horno);
+        $areaCocina = $this->impresora(['alias' => 'Cocina', 'uso' => 'comanda', 'cash_drawer' => 'ninguno']);
+        $this->area('Cocina', $this->heladas, $areaCocina);
         $this->actuarComo('cajero');
 
         $pedidoId = $this->postJson('/api/pos/pedidos', [
             'uuid' => (string) Str::uuid(), 'nombre' => 'Encargo Sra. Ana',
-            'items' => [['producto_id' => $this->pan->id, 'cantidad' => 30, 'notas' => 'bien tostado']],
+            'items' => [['producto_id' => $this->latteHelado->id, 'cantidad' => 30, 'notas' => 'bien tostado']],
         ])->json('pedido.id');
 
         $this->postJson("/api/impresion/pedidos/{$pedidoId}/comandas")->assertJsonPath('impreso', true);

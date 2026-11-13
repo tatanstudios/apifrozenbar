@@ -21,7 +21,7 @@ class NotificacionesTest extends TestCase
     private function crearProducto(float $stock, float $minimo): Producto
     {
         $producto = Producto::create([
-            'nombre'           => 'Harina',
+            'nombre'           => 'Café molido',
             'tipo'             => 'bien',
             'clase'            => 'materia_prima',
             'costo_unitario'   => 1,

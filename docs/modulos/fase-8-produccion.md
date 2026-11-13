@@ -6,7 +6,7 @@ Estado: terminada el 2026-11-01. Fase anterior: [fase-7-compras.md](fase-7-compr
 
 - **Recetas:**
   - **Contenido:** el producto que se produce, el rendimiento por tanda (en la unidad del producto), los ingredientes con su cantidad, unidad y % de merma esperada, y el procedimiento o notas.
-  - **Unidades:** cada ingrediente puede ir en cualquier unidad del mismo tipo que su insumo (kilogramos de levadura que se lleva en gramos, por ejemplo).
+  - **Unidades:** cada ingrediente puede ir en cualquier unidad del mismo tipo que su insumo (kilogramos de jarabe que se lleva en gramos, por ejemplo).
   - **Costo:** se calcula con el costo promedio vigente de los insumos. Da el costo de la tanda, el costo por unidad y el margen sobre el precio de venta, y el editor lo recalcula mientras se escribe.
   - **Activa y versiones:** hay una sola receta activa por producto. Si una receta ya se usó en producciones, editarla crea la versión siguiente; la anterior queda en el historial y se puede volver a activar.
 - **Producción (`PR-000001`):**
@@ -33,7 +33,7 @@ Estado: terminada el 2026-11-01. Fase anterior: [fase-7-compras.md](fase-7-compr
 
 | Situación | Qué hace |
 |---|---|
-| Unidad de un ingrediente de otro tipo (litros para la harina) | Se rechaza |
+| Unidad de un ingrediente de otro tipo (litros para el café molido) | Se rechaza |
 | El producto como ingrediente de su propia receta | Se rechaza |
 | Segunda receta activa para el mismo producto | Se rechaza: se edita la existente |
 | Insumos insuficientes y no se permite stock negativo | No se registra nada (toda la producción se revierte) |
@@ -82,9 +82,9 @@ Los permisos ya existían en el catálogo desde la Fase 0 (los tiene el rol `enc
 - resumen y permisos.
 
 **Navegador:**
-1. Receta de Pan francés: 100 panes con 20 lb de harina (+5% de merma) y 200 g de levadura. El editor y el servidor coinciden: $13.24 por tanda, $0.1324 por pan y margen del 11.7% con precio de $0.15.
-2. Producción PR-000001: se planificaron 200 panes y salieron 190 (95%). Consumió 42 lb de harina y 400 g de levadura, por $26.48 ($0.1394 por pan).
-3. Cierre del día: merma de 12 panes vencidos ($1.67). La existencia bajó de 134 a 122.
+1. Receta de Latte helado: 100 vasos con 20 lb de café molido (+5% de merma) y 200 g de jarabe. El editor y el servidor coinciden: $13.24 por tanda, $0.1324 por vaso y margen del 11.7% con precio de $0.15.
+2. Producción PR-000001: se planificaron 200 vasos y salieron 190 (95%). Consumió 42 lb de café molido y 400 g de jarabe, por $26.48 ($0.1394 por vaso).
+3. Cierre del día: merma de 12 vasos vencidos ($1.67). La existencia bajó de 134 a 122.
 4. El resumen muestra todo lo anterior, con mermas del 6.3% de lo producido.
 
 ## Limitaciones conocidas

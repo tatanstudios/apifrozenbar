@@ -26,8 +26,8 @@ class ClientesTest extends TestCase
 
     private Caja $caja;
     private TurnoCaja $turno;
-    private Producto $pan;
-    private Producto $pastel;
+    private Producto $latteHelado;
+    private Producto $frappe;
     private Cliente $cliente;
 
     protected function setUp(): void
@@ -38,14 +38,14 @@ class ClientesTest extends TestCase
         $this->caja = Caja::first();
         $unidad = UnidadesMedida::where('nombre', 'Unidad')->value('id');
 
-        $this->pan = Producto::create([
-            'nombre' => 'Pan francés', 'tipo' => 'bien', 'clase' => 'producto_terminado',
+        $this->latteHelado = Producto::create([
+            'nombre' => 'Latte helado', 'tipo' => 'bien', 'clase' => 'producto_terminado',
             'precio_venta' => 0.50, 'costo_unitario' => 0.10, 'unidad_medida_id' => $unidad,
         ]);
-        Inventario::create(['producto_id' => $this->pan->id, 'stock_actual' => 100]);
+        Inventario::create(['producto_id' => $this->latteHelado->id, 'stock_actual' => 100]);
 
-        $this->pastel = Producto::create([
-            'nombre' => 'Pastel de tres leches', 'tipo' => 'bien', 'clase' => 'producto_terminado',
+        $this->frappe = Producto::create([
+            'nombre' => 'Frappé de vainilla', 'tipo' => 'bien', 'clase' => 'producto_terminado',
             'precio_venta' => 25, 'costo_unitario' => 8, 'controla_stock' => false, 'unidad_medida_id' => $unidad,
         ]);
 
@@ -66,7 +66,7 @@ class ClientesTest extends TestCase
             'uuid'       => (string) Str::uuid(),
             'caja_id'    => $this->caja->id,
             'cliente_id' => $this->cliente->id,
-            'items'      => [['producto_id' => $this->pan->id, 'cantidad' => $cantidad]],
+            'items'      => [['producto_id' => $this->latteHelado->id, 'cantidad' => $cantidad]],
             'pagos'      => $pagos ?? [['metodo_pago_id' => $this->metodo('Crédito'), 'monto' => $total]],
         ], $extra));
     }
@@ -207,7 +207,7 @@ class ClientesTest extends TestCase
             'turno_id'   => $this->turno->id,
             'cliente_id' => $this->cliente->id,
             'fecha_venta' => now()->subMinutes(5)->toIso8601String(),
-            'items'      => [['producto_id' => $this->pan->id, 'cantidad' => 60, 'precio_unitario' => 0.50]],
+            'items'      => [['producto_id' => $this->latteHelado->id, 'cantidad' => 60, 'precio_unitario' => 0.50]],
             'pagos'      => [['metodo_pago_id' => $this->metodo('Crédito'), 'monto' => 30]],
         ]]])->assertOk();
 
@@ -246,7 +246,7 @@ class ClientesTest extends TestCase
         $this->postJson("/api/pos/ventas/{$venta->id}/devoluciones", [
             'uuid'           => (string) Str::uuid(),
             'caja_id'        => $this->caja->id,
-            'motivo'         => 'Pan duro',
+            'motivo'         => 'Café frío',
             'metodo_pago_id' => $this->metodo('Crédito'),
             'items'          => [['venta_detalle_id' => $detalle->id, 'cantidad' => 4]],
         ])->assertCreated()->assertJsonPath('message', fn ($m) => str_contains($m, 'de la cuenta del cliente'));
@@ -366,7 +366,7 @@ class ClientesTest extends TestCase
             'nombre'        => 'Ana Martínez',
             'telefono'      => '7000-1111',
             'fecha_entrega' => now()->addDays(2)->setTime(15, 0)->format('Y-m-d H:i'),
-            'items'         => [['producto_id' => $this->pastel->id, 'cantidad' => 1, 'notas' => 'Feliz cumpleaños Sofía']],
+            'items'         => [['producto_id' => $this->frappe->id, 'cantidad' => 1, 'notas' => 'Sin azúcar, extra hielo']],
             'anticipo'      => 10,
         ], $extra));
     }
@@ -379,7 +379,7 @@ class ClientesTest extends TestCase
             ->assertJsonPath('pedido.numero', 'PE-000001')
             ->assertJsonPath('pedido.anticipo', 10)
             ->assertJsonPath('pedido.pendiente', 15)
-            ->assertJsonPath('pedido.items.0.notas', 'Feliz cumpleaños Sofía')
+            ->assertJsonPath('pedido.items.0.notas', 'Sin azúcar, extra hielo')
             ->json('pedido');
 
         $resumen = CajaService::resumen($this->turno);
@@ -404,7 +404,7 @@ class ClientesTest extends TestCase
             'uuid'      => (string) Str::uuid(),
             'caja_id'   => $this->caja->id,
             'pedido_id' => $pedido['id'],
-            'items'     => [['producto_id' => $this->pastel->id, 'cantidad' => 1]],
+            'items'     => [['producto_id' => $this->frappe->id, 'cantidad' => 1]],
             'pagos'     => [['metodo_pago_id' => $this->metodo('Efectivo'), 'monto' => 20]],
         ])->assertCreated()
             ->assertJsonPath('venta.total', 25)
@@ -427,7 +427,7 @@ class ClientesTest extends TestCase
         $this->putJson("/api/pedidos-especiales/{$pedido['id']}", [
             'nombre'        => 'Ana Martínez',
             'fecha_entrega' => $pedido['fecha_entrega'],
-            'items'         => [['producto_id' => $this->pan->id, 'cantidad' => 2]],
+            'items'         => [['producto_id' => $this->latteHelado->id, 'cantidad' => 2]],
         ])->assertStatus(422)->assertJsonPath('message', 'El total no puede quedar por debajo del anticipo recibido ($20.00)');
     }
 

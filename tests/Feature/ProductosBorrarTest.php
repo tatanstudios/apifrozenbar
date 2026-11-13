@@ -25,7 +25,7 @@ class ProductosBorrarTest extends TestCase
         $this->seed(UnidadesMedidaSeeder::class);
         $libre = $this->producto('Flan de prueba');
         $libre->categorias()->attach(Categoria::create(['nombre' => 'Postres', 'estado' => true])->id);
-        $usado = $this->producto('Tres leches');
+        $usado = $this->producto('Frappé de vainilla');
         InventarioService::aplicarMovimiento(productoId: $usado->id, tipo: 'entrada', cantidad: 3, motivo: 'Prueba', usuarioId: $admin->id);
 
         $tabla = collect($this->getJson('/api/productos/tabla')->assertOk()->json())->keyBy('id');

@@ -13,8 +13,8 @@ Estado: terminada el 2026-10-31. Fase anterior: [fase-0-fundamentos.md](fase-0-f
 Las tres se probaron también hacia atrás (`migrate:rollback --step=3`).
 
 **Clases de producto:**
-- **Producto terminado:** pan, pasteles.
-- **Materia prima:** harina, azúcar, levadura.
+- **Producto terminado:** bebidas, frappés.
+- **Materia prima:** café molido, azúcar, leche.
 - **Reventa:** bebidas, golosinas.
 - **Empaque:** bolsas, cajas.
 
@@ -128,7 +128,7 @@ Si el usuario no tiene `productos.precios`, los campos de precio y costo quedan 
 
 En el frontend, `npm run build` compila sin errores. En el navegador se probó el ciclo completo:
 
-1. Crear «Pan francés» con precio, costo, mínimo y color.
+1. Crear «Latte helado» con precio, costo, mínimo y color.
 2. Ver la alerta en la campana.
 3. Registrar una entrada de 120 con costo.
 4. Ver el inventario valorizado (120 × $0.06 = $7.20) y la campana limpia.

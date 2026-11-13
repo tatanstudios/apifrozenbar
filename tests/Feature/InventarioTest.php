@@ -16,7 +16,7 @@ class InventarioTest extends TestCase
         $unidad = UnidadesMedida::create(['nombre' => 'Unidad', 'estado' => true]);
 
         $producto = Producto::create([
-            'nombre'           => 'Pan francés',
+            'nombre'           => 'Latte helado',
             'tipo'             => 'bien',
             'costo_unitario'   => 0.05,
             'unidad_medida_id' => $unidad->id,
@@ -114,7 +114,7 @@ class InventarioTest extends TestCase
         $unidad = UnidadesMedida::create(['nombre' => 'Unidad', 'estado' => true]);
 
         $id = $this->postJson('/api/productos/registro', [
-            'nombre'           => 'Concha',
+            'nombre'           => 'Frappé',
             'clase'            => 'producto_terminado',
             'se_vende'         => true,
             'controla_stock'   => true,

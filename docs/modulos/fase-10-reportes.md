@@ -9,7 +9,7 @@ Estado: terminada el 2026-11-01. Fase anterior: [fase-9-gastos.md](fase-9-gastos
 | Grupo | Reporte | Qué muestra |
 |---|---|---|
 | Ventas | Ventas por día | Tickets, ventas, descuentos, devoluciones, venta neta, IVA, neto sin IVA, costo, utilidad y margen |
-| Ventas | Ventas por hora | Tickets y ventas por hora del día (para planear personal y horneadas) |
+| Ventas | Ventas por hora | Tickets y ventas por hora del día (para planear personal y preparación) |
 | Ventas | Ventas por empleado | Tickets, ventas, ticket promedio, descuentos y anuladas |
 | Ventas | Ventas por forma de pago | Cobrado, devoluciones y neto por método, con su % |
 | Ventas | Productos más vendidos | Cantidad neta de devoluciones, ventas, costo, utilidad y margen; filtro por categoría |
@@ -111,7 +111,7 @@ La revisión de los archivos encontró dos detalles, ya corregidos:
 
 ## Consumo interno aparte y simulación de un día (2026-11-06)
 
-`tests/Feature/DiaCompletoTest.php` recorre un día entero por la API, como la tablet: apertura, venta rápida con cambio, pastel con tarjeta (anulado después con PIN), pedido de mostrador, mesa con comandas por área, cancelación parcial con PIN, cuentas separadas, cobro mixto, descuento autorizado, mesa con comanda anulada y liberada, devolución, cena del personal, gasto desde caja y cierre con faltante. Al final cruza el cierre de caja, los reportes y el inventario (existencias y último saldo del kárdex de cada producto). Todo cuadró salvo un punto, que se corrigió:
+`tests/Feature/DiaCompletoTest.php` recorre un día entero por la API, como la tablet: apertura, venta rápida con cambio, frappé con tarjeta (anulado después con PIN), pedido de mostrador, mesa con comandas por área, cancelación parcial con PIN, cuentas separadas, cobro mixto, descuento autorizado, mesa con comanda anulada y liberada, devolución, cena del personal, gasto desde caja y cierre con faltante. Al final cruza el cierre de caja, los reportes y el inventario (existencias y último saldo del kárdex de cada producto). Todo cuadró salvo un punto, que se corrigió:
 
 - **El consumo interno se contaba como venta en los reportes.** La cena del personal ($0.00) sumaba su costo al costo de ventas, contaba como ticket (bajaba el ticket promedio) y salía en «Productos más vendidos». Ahora:
   - **Ventas por día:** el costo y la utilidad son solo de lo vendido; la nueva columna «Consumo interno (costo)» lo muestra aparte; una venta que es puro consumo interno no cuenta como ticket.

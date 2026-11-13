@@ -51,10 +51,10 @@ return new class extends Migration
         $ahora = now();
         DB::table('categorias_gasto')->insert(collect([
             ['Servicios básicos', 'Luz, agua, teléfono e internet'],
-            ['Gas', 'Gas para hornos y cocina'],
+            ['Gas', 'Gas para cocina y plancha'],
             ['Alquiler', 'Alquiler del local'],
             ['Planilla', 'Salarios, horas extra y prestaciones'],
-            ['Mantenimiento', 'Reparación de hornos, equipo y local'],
+            ['Mantenimiento', 'Reparación de licuadoras, equipo y local'],
             ['Limpieza', 'Productos y servicios de limpieza'],
             ['Transporte', 'Combustible, fletes y repartos'],
             ['Papelería', 'Papel de impresora, talonarios, útiles'],

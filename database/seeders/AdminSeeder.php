@@ -16,7 +16,7 @@ class AdminSeeder extends Seeder
     {
         // Correo y clave del administrador salen del .env (ADMIN_EMAIL / ADMIN_PASSWORD).
         // Los valores por defecto son solo para desarrollo local: en producción hay que definirlos.
-        Administrador::firstOrCreate(['email' => env('ADMIN_EMAIL') ?: 'admin@thefrozenbar.test'], [
+        Administrador::firstOrCreate(['email' => env('ADMIN_EMAIL') ?: 'tatangamess@gmail.test'], [
             'nombre' => 'Administrador',
             'password' => Hash::make(env('ADMIN_PASSWORD') ?: '1234'),
             'estado' => true,
