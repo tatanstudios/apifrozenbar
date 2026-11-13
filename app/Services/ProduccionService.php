@@ -223,7 +223,7 @@ class ProduccionService
 
     /**
      * Lo que lleva UNA unidad vendida, por insumo y en la unidad del inventario
-     * (sin merma): Huevos Divorciados → 2 u Huevo, 2 u Pan francés. Es lo que el
+     * (sin merma): Huevos Divorciados → 2 u Huevo, 2 u Tostada. Es lo que el
      * mesero puede quitar o aumentar ("solo 1 huevo") sin cambiar el precio.
      * @return array [['producto_id', 'nombre', 'base', 'unidad'], ...]
      */
@@ -479,7 +479,7 @@ class ProduccionService
     // ── Mermas ────────────────────────────────────────────────
 
     /**
-     * Registra un lote de mermas (por ejemplo, el pan que no se vendió al
+     * Registra un lote de mermas (por ejemplo, el producto que no se vendió al
      * cerrar el día). Cada línea es idempotente por su uuid.
      *
      * @param array $items [['uuid', 'producto_id', 'cantidad', 'motivo', 'detalle'?], ...]

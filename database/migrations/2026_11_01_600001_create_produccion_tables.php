@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('uso', ['produccion', 'venta'])->default('produccion');
             $table->unsignedInteger('version')->default(1);
             $table->boolean('activa')->default(true);
-            $table->string('notas', 1000)->nullable();                        // procedimiento, horneado...
+            $table->string('notas', 1000)->nullable();                        // procedimiento, preparación...
             $table->foreignId('usuario_id')->constrained('administradores');
             $table->timestamps();
 

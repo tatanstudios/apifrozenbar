@@ -186,12 +186,12 @@ return [
         'produccion.ver' => 'Ve las producciones registradas, con lo planificado, lo producido, el rendimiento y el costo.',
         'produccion.registrar' => 'Registra la producción del día: suma el producto terminado al inventario y descuenta las materias primas de su receta. También anula una producción con motivo.',
         'produccion.ver_receta' => 'Ve los ingredientes, cantidades y procedimiento de cada receta: en Producción, en el detalle de una producción, en el resumen de consumo y en Recetas. Sin este permiso se puede registrar la producción igual (se descuenta lo de la receta), pero solo se ve qué se produce y cuánto, no con qué. Quien gestiona recetas siempre los ve.',
-        'mermas.registrar' => 'Registra mermas (pan quemado, vencido, dañado) con su motivo: bajan el inventario y salen al costo en los reportes de mermas y de utilidad. También las anula.',
+        'mermas.registrar' => 'Registra mermas (producto quemado, vencido, dañado) con su motivo: bajan el inventario y salen al costo en los reportes de mermas y de utilidad. También las anula.',
 
         'clientes.ver' => 'Ve la lista de clientes y su información, y los busca para asignarlos a una venta o a una mesa.',
         'clientes.gestionar' => 'Crea y edita clientes: nombre, documento, teléfono, dirección, y su límite y días de crédito. Sin límite de crédito el cliente no puede comprar «al crédito».',
         'cuentas_cobrar.gestionar' => 'Registra abonos a la cuenta de un cliente que compró a crédito y ve su estado de cuenta. Para anular un abono hace falta «Anular ventas» o el PIN de quien lo tenga.',
-        'pedidos.gestionar' => 'Maneja los pedidos especiales (pasteles por encargo): crearlos con fecha de entrega, recibir anticipos, entregarlos cobrando lo que falta o cancelarlos.',
+        'pedidos.gestionar' => 'Maneja los pedidos especiales (encargos grandes y catering): crearlos con fecha de entrega, recibir anticipos, entregarlos cobrando lo que falta o cancelarlos.',
         'clientes.credito_exceder' => 'Autoriza vender a crédito aunque el cliente pase de su límite. Sin el permiso, la venta que pasa del límite pide el PIN de quien lo tenga, y queda en Auditoría.',
 
         'gastos.ver' => 'Ve la lista de gastos registrados (gas, luz, salarios) con su categoría y origen.',

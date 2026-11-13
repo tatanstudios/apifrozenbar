@@ -17,7 +17,7 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->string('numero', 20)->unique();
             $table->enum('tipo', ['precuenta', 'especial'])->default('precuenta');
-            $table->string('nombre', 100);                        // "Mesa 2", "Sra. Ana", "Encargo pastel"
+            $table->string('nombre', 100);                        // "Mesa 2", "Sra. Ana", "Encargo evento"
             $table->string('telefono', 30)->nullable();           // contacto del encargo
             $table->foreignId('cliente_id')->nullable()           // FK con el módulo de Clientes
             ->constrained('clientes')->nullOnDelete();

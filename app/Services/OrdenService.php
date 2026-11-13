@@ -582,7 +582,7 @@ class OrdenService
 
     /**
      * Envía lo pendiente: una comanda por área con el mismo número. Lo que no tiene
-     * área (pan de vitrina, bebidas embotelladas) no pasa por cocina: queda entregado
+     * área (postre de vitrina, bebidas embotelladas) no pasa por cocina: queda entregado
      * sin comanda.
      * @return Collection<Comanda>
      */

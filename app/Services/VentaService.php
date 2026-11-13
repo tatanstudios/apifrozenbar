@@ -116,7 +116,7 @@ class VentaService
 
     /**
      * Saca del inventario lo vendido y devuelve su costo unitario:
-     * - un producto con existencia (pan, gaseosa) sale él mismo;
+     * - un producto con existencia (sándwich, gaseosa) sale él mismo;
      * - uno con receta de venta (limonada, plato, servicio) saca sus insumos;
      * - uno sin existencia ni receta no mueve inventario.
      * Además, cada extra elegido que gasta un insumo (fresa, miel) lo saca.

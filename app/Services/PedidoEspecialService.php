@@ -15,7 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Pedidos especiales (pasteles por encargo): se registran con fecha de entrega
+ * Pedidos especiales (encargos grandes y catering): se registran con fecha de entrega
  * y, si el cliente deja un anticipo, ese dinero entra a caja en el momento.
  * Al entregarlo se cobra desde el POS y el anticipo se descuenta del total.
  */

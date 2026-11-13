@@ -198,7 +198,7 @@ class ConfigMesasApiController extends Controller
         $validator = validator($request->all(), [
             'asignaciones'                => 'required|array',
             'asignaciones.*.categoria_id' => 'required|integer|exists:categorias,id',
-            // Sin área (null): se entrega directo, como el pan de vitrina, y no imprime comanda
+            // Sin área (null): se entrega directo, como el postre de vitrina, y no imprime comanda
             'asignaciones.*.area_id'      => 'present|nullable|integer|exists:areas_preparacion,id',
         ]);
         if ($validator->fails()) {

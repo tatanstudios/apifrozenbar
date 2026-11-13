@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('imagen', 300)->nullable(); // path del archivo
             $table->enum('tipo', ['bien', 'servicio', 'bien_servicio']);
 
-            // producto_terminado: pan, pasteles (se producen y se venden)
-            // materia_prima: harina, azúcar, levadura (se compran y se consumen en recetas)
+            // producto_terminado: bebidas, crepas (se producen y se venden)
+            // materia_prima: harina, tapioca, leche (se compran y se consumen en recetas)
             // reventa: bebidas, golosinas (se compran y se venden)
             // empaque: bolsas, cajas
             $table->enum('clase', ['producto_terminado', 'materia_prima', 'reventa', 'empaque'])

@@ -24,7 +24,7 @@ return new class extends Migration
         });
 
         Schema::table('categorias', function (Blueprint $table) {
-            // Sin área: se entrega directo (pan de vitrina) y no genera comanda
+            // Sin área: se entrega directo (postre de vitrina) y no genera comanda
             $table->foreignId('area_preparacion_id')->nullable()->after('nombre')->constrained('areas_preparacion')->nullOnDelete();
         });
 
