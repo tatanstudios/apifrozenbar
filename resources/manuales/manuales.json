@@ -1,0 +1,1840 @@
+{
+  "modulos": [
+    {
+      "id": "inicio",
+      "titulo": "Primeros pasos",
+      "descripcion": "Cómo está armado el sistema y el orden recomendado para un día normal.",
+      "manuales": [
+        {
+          "id": "como-funciona",
+          "titulo": "Cómo funciona el sistema",
+          "resumen": "Qué hace la web, qué hace la tablet, qué es un turno y por qué casi todo pide uno abierto.",
+          "permisos": [],
+          "donde": {
+            "web": "Desde cualquier navegador de la red del negocio",
+            "tablet": "App de la tablet (meseros y caja)"
+          },
+          "secciones": [
+            {
+              "titulo": "Las dos pantallas",
+              "puntos": [
+                "La web es el sistema completo: ventas, caja, compras, inventario, producción, reportes y configuración.",
+                "La tablet es para el día a día: mesas, venta rápida, caja y turno, ventas, compras, gastos, inventario, producción y resumen del día.",
+                "Las dos trabajan sobre el mismo servidor: lo que se hace en una se ve en la otra.",
+                "Cada usuario solo ve los módulos que su rol le permite (Usuarios y seguridad → Roles y permisos)."
+              ]
+            },
+            {
+              "titulo": "El turno de caja",
+              "texto": "Todo lo que mueve dinero (vender, cobrar, abonos, gastos desde caja, pagos a proveedores) queda dentro del turno abierto de la caja, a nombre de quien lo abrió. Sin turno abierto no se puede vender: primero se abre en Caja.",
+              "puntos": [
+                "Hay un solo turno abierto por caja.",
+                "Cada quien vende en su propio turno. Si alguien se fue sin cerrar el suyo, el siguiente primero lo cierra contando el efectivo y luego abre el propio.",
+                "Al cerrar se cuenta el efectivo y el sistema dice si cuadra, sobra o falta."
+              ]
+            },
+            {
+              "titulo": "Un día normal, en orden",
+              "pasos": [
+                "Abrir el turno en Caja con el fondo inicial (y revisar la lista «Por comprar» que dejó el turno anterior).",
+                "Registrar la producción del día (lo que se horneó) en Producción.",
+                "Vender: Mesas para el salón, Venta rápida para el mostrador.",
+                "Registrar compras y gastos conforme pasen.",
+                "Al final del día, registrar las mermas (lo que no se vendió o se dañó).",
+                "Cerrar el turno contando el efectivo e imprimir el cierre."
+              ]
+            },
+            {
+              "titulo": "El PIN de autorización",
+              "texto": "Algunas acciones necesitan a alguien con más permisos: anular, devolver, descuentos mayores al máximo, cancelar algo ya enviado a cocina, vender a crédito sobre el límite. Cuando pasa, el sistema abre una ventana para que el encargado escriba su PIN ahí mismo, sin cambiar de usuario. Queda guardado quién autorizó."
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "¿Qué pasa si se cae el internet?",
+              "r": "Nada, mientras el servidor del local siga encendido: el sistema trabaja en la red local. Si lo que se cae es el servidor o el Wi-Fi, la venta rápida de la web sigue vendiendo y sincroniza al volver (ver «Vender sin conexión»)."
+            },
+            {
+              "p": "¿Por qué no veo un módulo que otro usuario sí ve?",
+              "r": "Depende del rol. El administrador lo habilita en Roles y permisos."
+            }
+          ],
+          "relacionados": [
+            "abrir-turno",
+            "venta-rapida",
+            "roles-permisos"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ventas",
+      "titulo": "Módulo ventas",
+      "descripcion": "Mesas, venta rápida de mostrador, cobro, pedidos por cobrar e historial.",
+      "manuales": [
+        {
+          "id": "mesas",
+          "titulo": "Mesas y comandas",
+          "resumen": "Abrir una mesa, tomar el pedido con extras, enviar comandas a cocina y barra, separar cuentas y cobrar.",
+          "permisos": [
+            "pos.vender"
+          ],
+          "donde": {
+            "web": "Ventas → Mesas (punto de venta)",
+            "tablet": "Inicio → Mesas"
+          },
+          "secciones": [
+            {
+              "titulo": "El mapa de mesas",
+              "puntos": [
+                "Cada terminal es una tarjeta: libre (cian) u ocupada (rosa).",
+                "Las ocupadas muestran sus cuentas, hace cuánto llegaron, lo que falta cobrar y lo que está por enviar.",
+                "Se filtra por zona (Salón, Terraza…) y se busca por mesa, cuenta o mesero.",
+                "Se actualiza solo cada pocos segundos: lo que hace otra tablet aparece aquí."
+              ]
+            },
+            {
+              "titulo": "Tomar un pedido",
+              "pasos": [
+                "Toca la mesa libre y luego «Abrir mesa».",
+                "Toca los productos. Si tienen extras (leche, endulzante, saborizante), se abre la ventana para elegirlos, con cantidad y nota para cocina.",
+                "Los productos quedan «Por enviar» en la cuenta activa. Abajo aparece un aviso verde «✓ Americano agregado a Ticket 1» (en la tablet, tócalo para ver la cuenta).",
+                "Si vuelves a tocar el mismo producto, con los mismos extras, se suma a la misma línea («2 × Americano»). Con otros extras o una nota distinta sale en otra línea.",
+                "¿Te equivocaste de extra (era deslactosada, no entera)? Mientras no se envíe, toca «Cambiar extras» en la línea: se corrige y el precio se recalcula.",
+                "Si un extra gasta un insumo (leche, azúcar, fresa) y ya no hay, aparece «Agotado» y no se puede elegir. Lo que gasta la receta y los extras se descuenta del inventario al cobrar.",
+                "Toca «Enviar a cocina»: sale un ticket por área (COCINA, BARRA…) solo con lo que le toca a cada una.",
+                "Para pedir algo más después, agrégalo y envía otra vez: sale una comanda nueva."
+              ]
+            },
+            {
+              "titulo": "Cuentas separadas",
+              "puntos": [
+                "Arriba aparecen todas las cuentas de la mesa: en azul las abiertas y en verde las pagadas «(Pagado)». Con «+ Cuenta» se agrega otra.",
+                "Se puede renombrar una cuenta («Luz», «Señor de lentes»): en la tablet deja presionada la cuenta (o «Más» → «Cambiar nombre»); en la web, el botón «✏️ Nombre» junto a las cuentas. El nombre sale en la comanda y en la precuenta.",
+                "¿Abriste una cuenta por error? Bórrala: en la tablet «Más» → «Borrar Ticket 2»; en la web «🗑 Borrar» junto a las cuentas. Lo que tenga sin enviar se quita con ella. No se puede borrar si ya tiene algo enviado a cocina (cancélalo con motivo o muévelo), si ya está pagada o si es la única cuenta abierta (para eso está «Liberar mesa»).",
+                "Selecciona productos y muévelos a otra cuenta o a una nueva.",
+                "Una línea de varias unidades se puede separar («2 frappés → 1 y 1»).",
+                "Cada cuenta se cobra por separado y tiene su propia precuenta.",
+                "«Marcar entregados» (en «Más», con productos seleccionados) solo aplica a lo que ya se envió: primero toca «Enviar»."
+              ]
+            },
+            {
+              "titulo": "Quitar o cancelar",
+              "puntos": [
+                "Lo que aún no se envía se quita sin más.",
+                "Lo ya enviado se cancela con motivo y el PIN de un encargado. Sale un aviso CANCELADO a cocina y queda en auditoría."
+              ]
+            },
+            {
+              "titulo": "Cobrar y liberar",
+              "pasos": [
+                "Toca «Precuenta» si el cliente quiere ver el total antes (no es comprobante de pago).",
+                "Toca «Cobrar» para la cuenta activa, o selecciona productos para cobrar solo esos.",
+                "Elige la forma de pago (puede ser mixta). Se imprime el ticket.",
+                "Cuando ya no queda nada por cobrar, la mesa queda libre sola."
+              ]
+            }
+          ],
+          "ejemplos": [
+            {
+              "titulo": "Mesa de 3 que paga por separado",
+              "pasos": [
+                "Abre MESA 2 y agrega 3 cafés y 2 desayunos.",
+                "Envía a cocina: sale un ticket en Barra (cafés) y otro en Cocina (desayunos).",
+                "Al pedir la cuenta, toca «+ Cuenta» dos veces y renómbralas «Ana» y «Luis».",
+                "Mueve a cada cuenta lo que consumió cada uno y cóbralas una por una. Al cobrar la última, la mesa se libera."
+              ]
+            },
+            {
+              "titulo": "Un café sin azúcar y con leche deslactosada",
+              "pasos": [
+                "Toca Americano: se abre la ventana de extras.",
+                "Elige «Deslactosada» en Leche. Si el extra tiene precio, se suma a la línea.",
+                "Para quitar el azúcar de la receta, toca la línea y luego «Ingredientes» (ver «Extras e ingredientes»)."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "¿El inventario baja al enviar a cocina?",
+              "r": "No, baja al cobrar. Pero si el negocio no permite stock negativo, lo que ya está en mesas se aparta: no se puede pedir más de lo que hay."
+            },
+            {
+              "p": "¿Puedo cambiar a los clientes de mesa?",
+              "r": "Sí, con «Cambiar de mesa». No se puede pasar a una mesa ocupada."
+            },
+            {
+              "p": "Dos tablets abren la misma mesa, ¿se duplica?",
+              "r": "No: las dos trabajan sobre la misma orden."
+            },
+            {
+              "p": "Si cierro el turno con una mesa a medias, ¿se pierde?",
+              "r": "No. La mesa sigue abierta con lo pendiente y la cobra quien abra el siguiente turno. Antes de cerrar, la tablet avisa qué mesas y pedidos siguen sin cobrar."
+            }
+          ],
+          "relacionados": [
+            "extras-ingredientes",
+            "cobrar",
+            "areas-modificadores"
+          ]
+        },
+        {
+          "id": "venta-rapida",
+          "titulo": "Venta rápida (mostrador)",
+          "resumen": "Vender en el mostrador sin mesa: agregar productos, descuentos, cliente, cobrar o enviar la comanda y cobrar después.",
+          "permisos": [
+            "pos.vender"
+          ],
+          "donde": {
+            "web": "Ventas → Venta rápida",
+            "tablet": "Inicio → Venta rápida"
+          },
+          "secciones": [
+            {
+              "titulo": "Agregar productos",
+              "puntos": [
+                "Todas las categorías están a la vista arriba; también se busca por nombre o con el lector de código de barras.",
+                "Si el producto tiene extras, se abre la ventana para elegirlos. Si se vende por peso, pide la cantidad.",
+                "Los productos sin existencia aparecen como «Agotado» y no se agregan cuando el negocio no permite stock negativo.",
+                "La venta en curso se guarda: si sales al menú y vuelves, sigue ahí."
+              ]
+            },
+            {
+              "titulo": "Cambiar una línea",
+              "puntos": [
+                "Con − y + se cambia la cantidad.",
+                "Tocar la línea (o ✎) vuelve a abrir sus extras para corregirlos.",
+                "«Ingredientes» cambia la receta de esa línea (sin huevo, doble queso) sin cambiar el precio.",
+                "Se puede poner descuento por línea o un descuento general. Si pasa del máximo, se pide el PIN."
+              ]
+            },
+            {
+              "titulo": "Cobrar ahora",
+              "pasos": [
+                "Toca «Cobrar».",
+                "Elige la forma de pago; para pagar con varias, usa «¿Paga con varias formas?» (ver «Cobrar y pagos mixtos»).",
+                "Se imprime el ticket y, si hay efectivo, se abre el cajón. Si hay comandas, salen también."
+              ]
+            },
+            {
+              "titulo": "Enviar la comanda y cobrar después",
+              "texto": "Para cuando el cliente pide, se sienta o espera, y paga al recoger.",
+              "pasos": [
+                "Arma el pedido y toca «Enviar comanda».",
+                "Escribe a nombre de quién («Juan», «señora de rojo», «#3»). La comanda sale a cocina o barra con ese nombre y la leyenda «se cobra al entregar».",
+                "El pedido queda en «Por cobrar (N)», arriba en la pantalla.",
+                "Al recoger, abre «Por cobrar», elige el pedido y cobra todo o solo los productos marcados."
+              ]
+            },
+            {
+              "titulo": "Otras opciones",
+              "puntos": [
+                "Precuenta: deja la venta en espera y la retoma después (solo productos sin extras).",
+                "Pedido especial: si vienen a recoger un encargo, se carga desde Pedidos especiales y solo se cobra lo que falta."
+              ]
+            }
+          ],
+          "ejemplos": [
+            {
+              "titulo": "Cliente que paga al recoger",
+              "pasos": [
+                "Agrega 2 sándwiches y 1 frappé con caramelo.",
+                "Toca «Enviar comanda» y escribe «Carlos».",
+                "Cocina recibe los sándwiches y barra el frappé, cada uno con «Carlos».",
+                "Cuando Carlos recoge, abre «Por cobrar», toca su pedido y «Cobrar todo»."
+              ]
+            },
+            {
+              "titulo": "Agregar algo a un pedido que ya se envió",
+              "pasos": [
+                "Abre «Por cobrar», toca el pedido y luego «Agregar productos».",
+                "La pantalla muestra «Agregando al pedido de …». Agrega lo nuevo y envía: sale una comanda solo con eso."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "¿Puedo dar descuento a un pedido enviado con «Enviar comanda»?",
+              "r": "El descuento se aplica al cobrar en la caja. Para enviar la comanda, la venta no debe llevar descuento."
+            },
+            {
+              "p": "¿Qué pasa con la venta en pantalla si cierro el turno?",
+              "r": "Se queda guardada en ese dispositivo hasta que la cobres o la vacíes."
+            }
+          ],
+          "relacionados": [
+            "cobrar",
+            "pedidos-por-cobrar",
+            "extras-ingredientes",
+            "sin-conexion"
+          ]
+        },
+        {
+          "id": "extras-ingredientes",
+          "titulo": "Extras e ingredientes",
+          "resumen": "La diferencia entre un extra (cambia el precio y puede descontar un insumo) y un cambio de ingredientes (no cambia el precio, solo lo que baja del inventario).",
+          "permisos": [
+            "pos.vender"
+          ],
+          "donde": {
+            "web": "Venta rápida y Mesas, al tocar un producto o una línea",
+            "tablet": "Venta rápida y Mesas, al tocar un producto o una línea"
+          },
+          "secciones": [
+            {
+              "titulo": "Extras (modificadores)",
+              "puntos": [
+                "Son opciones del producto organizadas en grupos: Leche (entera, deslactosada, almendra), Endulzante, Saborizante…",
+                "Un grupo puede ser obligatorio y de una o varias opciones.",
+                "Cada opción puede tener precio extra, que se suma a la línea.",
+                "Cada opción puede descontar un insumo del inventario (por ejemplo, 30 ml de jarabe de caramelo).",
+                "En el ticket y la comanda salen junto al producto: «Frappuccino (Deslactosada, Caramelo)».",
+                "Se configuran en Inventario → Catálogo de Productos → pestaña Modificadores."
+              ]
+            },
+            {
+              "titulo": "Ingredientes (cambios a la receta)",
+              "texto": "Solo aparece en productos con receta que se descuenta al vender (desayunos, bebidas preparadas). Sirve cuando el cliente pide algo distinto pero se cobra igual.",
+              "puntos": [
+                "Quitar: «sin huevo» pone el huevo en 0 y no se descuenta.",
+                "Menos o más: «poca azúcar», «doble queso» cambian la cantidad que se descuenta.",
+                "Las cantidades se muestran en la unidad de la receta (gramos, mililitros, unidades), no en la del inventario.",
+                "El precio no cambia. El cambio sale en la comanda («sin Huevo») para que cocina lo vea."
+              ]
+            },
+            {
+              "titulo": "¿Extra o ingrediente?",
+              "puntos": [
+                "Si el cliente debe pagar más o debe elegir entre opciones → extra.",
+                "Si solo cambia lo que lleva el plato y cuesta lo mismo → ingrediente."
+              ]
+            }
+          ],
+          "ejemplos": [
+            {
+              "titulo": "Americano sin azúcar",
+              "pasos": [
+                "La receta del Americano lleva 10 g de azúcar.",
+                "Agrega el Americano y toca «Ingredientes» en la línea.",
+                "Baja Azúcar a 0 y guarda. Se cobra igual y no se descuenta el azúcar."
+              ]
+            },
+            {
+              "titulo": "Desayuno con huevo extra",
+              "pasos": [
+                "Agrega el desayuno y toca «Ingredientes».",
+                "Sube Huevo de 2 a 3. Se descuentan 3 huevos; el precio queda igual.",
+                "Si el negocio cobra el huevo extra, conviene crear un extra «Huevo adicional» con precio."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "No me salen los extras de un producto.",
+              "r": "El grupo debe estar activo y asignado a ese producto, y la opción también activa (Inventario → Catálogo de Productos → pestaña Modificadores)."
+            },
+            {
+              "p": "No me sale el botón Ingredientes.",
+              "r": "El producto necesita una receta que se descuente al vender (producto que no lleva inventario propio). Ver «Recetas»."
+            }
+          ],
+          "relacionados": [
+            "recetas",
+            "areas-modificadores"
+          ]
+        },
+        {
+          "id": "cobrar",
+          "titulo": "Cobrar y pagos mixtos",
+          "resumen": "Efectivo con cambio, tarjeta, transferencia, crédito, o varias formas en un mismo cobro.",
+          "permisos": [
+            "pos.vender"
+          ],
+          "donde": {
+            "web": "Ventana de cobro de Venta rápida, Mesas y Por cobrar",
+            "tablet": "Ventana de cobro de Venta rápida, Mesas y Por cobrar"
+          },
+          "secciones": [
+            {
+              "titulo": "Una sola forma de pago",
+              "pasos": [
+                "Elige el método (Efectivo, Tarjeta, Transferencia…).",
+                "En efectivo escribe lo que entrega el cliente o usa los billetes rápidos: el sistema calcula el cambio.",
+                "En transferencia, escribe la referencia si se pide.",
+                "Toca «Cobrar»."
+              ]
+            },
+            {
+              "titulo": "Varias formas de pago",
+              "pasos": [
+                "Elige el primer método y escribe el monto que paga con él.",
+                "En el recuadro «¿Paga con varias formas?» toca «Agregar pago». Queda en la lista.",
+                "Repite con el siguiente método. Arriba se ve cuánto falta.",
+                "Cuando lo pagado cubre el total, toca «Cobrar». Si algo no se puede agregar, el recuadro dice por qué."
+              ]
+            },
+            {
+              "titulo": "Reglas",
+              "puntos": [
+                "Tarjeta y transferencia no pueden pasar del total; solo el efectivo da cambio.",
+                "Crédito solo aparece con un cliente asignado que tenga límite de crédito, y necesita conexión con el servidor.",
+                "Si el crédito pasa lo disponible, se pide el PIN de quien puede autorizarlo.",
+                "Al cuadre de caja solo suma el efectivo; tarjeta, transferencia y crédito se reportan aparte."
+              ]
+            }
+          ],
+          "ejemplos": [
+            {
+              "titulo": "Cuenta de $25: $10 transferencia, $10 tarjeta y el resto en efectivo",
+              "pasos": [
+                "Elige Transferencia, escribe 10 y la referencia, toca «Agregar pago».",
+                "Elige Tarjeta, escribe 10, toca «Agregar pago». Faltan $5.",
+                "Elige Efectivo; el cliente da $10. Toca «Cobrar»: cambio de $5."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "Me equivoqué en un pago de la lista.",
+              "r": "Quítalo de la lista antes de cobrar y agrégalo otra vez."
+            },
+            {
+              "p": "Ya cobré y era otro método.",
+              "r": "Anula la venta desde Ventas (con autorización) y vuelve a cobrarla."
+            }
+          ],
+          "relacionados": [
+            "historial-ventas",
+            "clientes-credito"
+          ]
+        },
+        {
+          "id": "pedidos-por-cobrar",
+          "titulo": "Pedidos por cobrar",
+          "resumen": "Los pedidos de mostrador que ya salieron a cocina y faltan cobrar: cobrar todo, cobrar una parte, agregar o cancelar.",
+          "permisos": [
+            "pos.vender"
+          ],
+          "donde": {
+            "web": "Venta rápida → botón «Por cobrar (N)»",
+            "tablet": "Venta rápida → botón «Por cobrar (N)»"
+          },
+          "secciones": [
+            {
+              "titulo": "La lista",
+              "puntos": [
+                "Muestra los pedidos del más antiguo al más nuevo, con nombre, cuánto llevan esperando, lo pendiente y el total.",
+                "También avisa si hay mesas con algo por cobrar."
+              ]
+            },
+            {
+              "titulo": "Dentro de un pedido",
+              "puntos": [
+                "Cobrar todo: cobra lo pendiente del pedido.",
+                "Cobrar una parte: marca los productos y toca «Cobrar N». Quedan como «Pagado» y el resto sigue pendiente.",
+                "Agregar productos: vuelve a la venta rápida en modo «Agregando al pedido de …».",
+                "Cancelar un producto: pide motivo y PIN; a cocina sale el aviso CANCELADO."
+              ]
+            }
+          ],
+          "ejemplos": [
+            {
+              "titulo": "Dos amigos, uno paga primero",
+              "pasos": [
+                "El pedido «Mesa terraza» tiene 2 cafés y 2 pasteles.",
+                "Marca 1 café y 1 pastel y toca «Cobrar 2».",
+                "Esos dos quedan «Pagado»; el otro amigo paga lo restante después."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "¿Puedo cerrar el turno con pedidos por cobrar?",
+              "r": "Sí, pero el cierre avisa antes. Los pedidos siguen pendientes para el siguiente turno."
+            }
+          ],
+          "relacionados": [
+            "venta-rapida",
+            "cobrar"
+          ]
+        },
+        {
+          "id": "historial-ventas",
+          "titulo": "Historial, anulaciones y devoluciones",
+          "resumen": "Buscar una venta, reimprimir el ticket, anularla o devolver productos.",
+          "permisos": [
+            "pos.historial",
+            "pos.vender"
+          ],
+          "donde": {
+            "web": "Ventas → Historial de ventas",
+            "tablet": "Inicio → Ventas → tocar la venta"
+          },
+          "secciones": [
+            {
+              "titulo": "Buscar y reimprimir",
+              "puntos": [
+                "Filtra por fecha o por turno y busca por número de ticket (000123).",
+                "«Reimprimir ticket» saca una copia (no abre el cajón)."
+              ]
+            },
+            {
+              "titulo": "Anular una venta",
+              "puntos": [
+                "Solo ventas del turno abierto. Pide motivo y autorización (permiso de anular o PIN).",
+                "Regresa el inventario, saca el dinero de la caja y, si venía de una mesa, sus productos vuelven a quedar por cobrar.",
+                "Una venta al crédito con abonos no se anula: primero se anulan los abonos."
+              ]
+            },
+            {
+              "titulo": "Devolver productos",
+              "puntos": [
+                "Sirve para ventas de cualquier turno; puede ser parcial.",
+                "Pide autorización. El reembolso sale del turno abierto.",
+                "Lo que vuelve en buen estado regresa al inventario; lo dañado no.",
+                "En ventas al crédito se puede «Descontar de su cuenta» en lugar de devolver dinero."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "¿Anular o devolver?",
+              "r": "Anular deshace la venta del turno actual como si no hubiera ocurrido (error al cobrar). Devolver registra que el cliente regresó algo, aunque sea de otro día."
+            },
+            {
+              "p": "¿Qué pasa con el número T-?",
+              "r": "El número sigue creciendo y no se reutiliza; una venta anulada conserva su número y queda marcada."
+            }
+          ],
+          "relacionados": [
+            "cobrar",
+            "cerrar-turno"
+          ]
+        },
+        {
+          "id": "sin-conexion",
+          "titulo": "Vender sin conexión",
+          "resumen": "Qué hace la venta rápida de la web cuando no llega al servidor y cómo se sincroniza.",
+          "permisos": [
+            "pos.vender"
+          ],
+          "donde": {
+            "web": "Ventas → Venta rápida (indicador de conexión arriba)"
+          },
+          "secciones": [
+            {
+              "titulo": "Qué funciona",
+              "puntos": [
+                "La venta rápida de la web sigue vendiendo con la última copia de productos y precios.",
+                "Cada venta queda guardada en el equipo con un número provisional (OFF-1-000001) y se imprime desde el navegador con «Emitido sin conexión».",
+                "Al volver la conexión se envían solas y reciben su número T- definitivo."
+              ]
+            },
+            {
+              "titulo": "Qué no funciona sin servidor",
+              "puntos": [
+                "Mesas, Enviar comanda, Por cobrar y precuentas.",
+                "Venta al crédito y búsqueda de clientes.",
+                "Anular, devolver y la impresora térmica.",
+                "La tablet necesita el servidor para todo."
+              ]
+            },
+            {
+              "titulo": "El indicador",
+              "puntos": [
+                "«En línea», «Sin conexión · N pendientes», «Sincronizando…».",
+                "Al tocarlo se ven las ventas pendientes, se reimprimen y se sincroniza a mano.",
+                "No se puede cerrar el turno con ventas sin sincronizar."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "¿Y si el precio cambió mientras estaba sin conexión?",
+              "r": "Se respeta lo que se cobró y queda una observación en la venta."
+            },
+            {
+              "p": "¿Se pueden duplicar al sincronizar?",
+              "r": "No. Cada venta lleva un identificador único; el servidor no la registra dos veces."
+            }
+          ],
+          "relacionados": [
+            "venta-rapida"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "caja",
+      "titulo": "Módulo caja y turnos",
+      "descripcion": "Abrir el turno, mover dinero, arqueos y cierre.",
+      "manuales": [
+        {
+          "id": "abrir-turno",
+          "titulo": "Abrir turno",
+          "resumen": "Elegir la caja, contar el fondo inicial y quedar listo para vender.",
+          "permisos": [
+            "caja.abrir"
+          ],
+          "donde": {
+            "web": "Caja → Turno actual",
+            "tablet": "Inicio → Caja (o «Abrir turno» en el aviso)"
+          },
+          "secciones": [
+            {
+              "titulo": "Paso a paso",
+              "pasos": [
+                "Si hay varias cajas, elige cuál usa este dispositivo (se recuerda).",
+                "Elige quién abre. Si no es el usuario de la sesión, esa persona escribe su PIN.",
+                "Escribe el fondo inicial o cuenta billetes y monedas con − y +.",
+                "Revisa la lista «Por comprar» que dejó el turno anterior (productos en su mínimo).",
+                "Toca «Abrir turno»."
+              ]
+            },
+            {
+              "titulo": "Si la caja tiene el turno de otra persona",
+              "texto": "Aparece un aviso rojo: «La caja tiene abierto el turno de …». Para vender, primero cierra ese turno contando el efectivo (el cierre queda a tu nombre con la diferencia que salga) y luego abre el tuyo."
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "¿Puedo abrir dos turnos en la misma caja?",
+              "r": "No, el sistema no lo permite aunque lo intenten dos tablets a la vez."
+            }
+          ],
+          "relacionados": [
+            "movimientos-caja",
+            "cerrar-turno"
+          ]
+        },
+        {
+          "id": "movimientos-caja",
+          "titulo": "Ingresos, egresos, arqueo y corte X",
+          "resumen": "Meter o sacar dinero de la gaveta, contar a mitad del día y ver cómo va el turno.",
+          "permisos": [
+            "caja.movimientos",
+            "caja.arqueo"
+          ],
+          "donde": {
+            "web": "Caja → Turno actual",
+            "tablet": "Inicio → Caja y turno"
+          },
+          "secciones": [
+            {
+              "titulo": "Botones del turno",
+              "puntos": [
+                "Ingreso: entra dinero que no es venta (cambio que trae el dueño). Pide motivo.",
+                "Egreso: sale dinero que no es gasto ni compra (retiro a la caja fuerte). No deja sacar más efectivo del que hay.",
+                "Gasto: abre el registro de gastos ya pagado desde la caja.",
+                "Arqueo: cuenta la gaveta sin cerrar y muestra la diferencia.",
+                "Corte X: imprime cómo va el turno sin cerrarlo.",
+                "Abrir cajón: abre la gaveta sin venta; pide motivo y queda en auditoría."
+              ]
+            },
+            {
+              "titulo": "Qué muestra la pantalla",
+              "puntos": [
+                "Fondo, ventas, ingresos, egresos y efectivo en caja.",
+                "Totales por forma de pago y ventas por empleado.",
+                "Lo que salió del inventario con las ventas del turno y lo que hay que comprar."
+              ]
+            },
+            {
+              "titulo": "Corregir un movimiento",
+              "texto": "Los ingresos y egresos manuales se anulan con motivo (no se borran). Los de ventas se corrigen anulando la venta."
+            }
+          ],
+          "relacionados": [
+            "cerrar-turno",
+            "gastos"
+          ]
+        },
+        {
+          "id": "cerrar-turno",
+          "titulo": "Cerrar turno",
+          "resumen": "Contar el efectivo, ver si cuadra e imprimir el cierre con la lista de compras.",
+          "permisos": [
+            "caja.cerrar"
+          ],
+          "donde": {
+            "web": "Caja → Turno actual → Cerrar turno",
+            "tablet": "Inicio → Caja y turno → Cerrar turno"
+          },
+          "secciones": [
+            {
+              "titulo": "Paso a paso",
+              "pasos": [
+                "Toca «Cerrar turno». La tablet avisa si quedan pedidos de mostrador o mesas sin cobrar.",
+                "Elige quién cierra (con PIN si es otra persona).",
+                "Cuenta billetes y monedas con − y +.",
+                "Confirma: el sistema muestra si cuadra, sobra o falta.",
+                "Imprime el cierre: lleva totales por forma de pago, por empleado, la diferencia, el conteo y «POR COMPRAR»."
+              ]
+            },
+            {
+              "titulo": "Cierre ciego",
+              "texto": "Si está activado en Datos del negocio, quien cierra no ve cuánto debería haber mientras cuenta; el resultado se muestra al final. Sirve para que el conteo sea honesto."
+            },
+            {
+              "titulo": "Después del cierre",
+              "puntos": [
+                "Ya no se aceptan movimientos en ese turno.",
+                "Se consulta en Caja → Historial de cierres.",
+                "Solo el administrador puede reabrirlo, con motivo (queda en auditoría)."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "No me deja cerrar.",
+              "r": "En la web, puede haber ventas sin conexión sin sincronizar. Revisa el indicador de conexión."
+            },
+            {
+              "p": "¿Lo pendiente en mesas o por cobrar se pierde?",
+              "r": "No. Queda para el siguiente turno, aunque lo abra otra persona."
+            }
+          ],
+          "relacionados": [
+            "historial-cierres",
+            "abrir-turno"
+          ]
+        },
+        {
+          "id": "historial-cierres",
+          "titulo": "Historial de cierres",
+          "resumen": "Revisar turnos cerrados, faltantes y sobrantes, y reimprimir un cierre.",
+          "permisos": [
+            "caja.historial"
+          ],
+          "donde": {
+            "web": "Caja → Historial de cierres",
+            "tablet": "Inicio → Caja y turno → Historial de cierres"
+          },
+          "secciones": [
+            {
+              "titulo": "Qué se ve",
+              "puntos": [
+                "Cada turno con quién abrió, quién cerró, fondo, ventas, esperado, contado y diferencia.",
+                "Totales del periodo con faltantes y sobrantes; filtro por cajero.",
+                "El detalle del turno se imprime y, con permiso, se puede reabrir."
+              ]
+            }
+          ],
+          "relacionados": [
+            "cerrar-turno",
+            "reportes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clientes",
+      "titulo": "Módulo clientes",
+      "descripcion": "Clientes, ventas al crédito, abonos y encargos.",
+      "manuales": [
+        {
+          "id": "clientes-credito",
+          "titulo": "Clientes y venta al crédito",
+          "resumen": "Registrar clientes, darles límite de crédito y venderles al crédito.",
+          "permisos": [
+            "clientes.ver",
+            "clientes.gestionar"
+          ],
+          "donde": {
+            "web": "Clientes → Clientes",
+            "tablet": "Inicio → Clientes"
+          },
+          "secciones": [
+            {
+              "titulo": "Registrar un cliente",
+              "puntos": [
+                "Nombre, DUI/NIT (no se repite), teléfono, correo, dirección y notas.",
+                "Límite de crédito y plazo en días (solo quien gestiona cuentas por cobrar los asigna)."
+              ]
+            },
+            {
+              "titulo": "Vender al crédito",
+              "pasos": [
+                "Por ahora la venta rápida no asigna cliente, así que no vende al crédito (se quitó el 2026-11-05).",
+                "El crédito solo aparece al entregar un pedido especial de un cliente con límite de crédito: al cobrar, elige «Crédito» y el ticket sale con la línea para la firma."
+              ]
+            },
+            {
+              "titulo": "La ficha del cliente",
+              "puntos": [
+                "Saldo, crédito disponible y vencido.",
+                "Pestañas: por cobrar, abonos, compras y estado de cuenta."
+              ]
+            }
+          ],
+          "relacionados": [
+            "cuentas-cobrar",
+            "cobrar"
+          ]
+        },
+        {
+          "id": "cuentas-cobrar",
+          "titulo": "Cuentas por cobrar y abonos",
+          "resumen": "Recibir abonos, ver lo vencido y entregar el estado de cuenta.",
+          "permisos": [
+            "cuentas_cobrar.gestionar"
+          ],
+          "donde": {
+            "web": "Clientes → Cuentas por cobrar, o la ficha del cliente",
+            "tablet": "Inicio → Clientes → tocar el cliente → Recibir abono"
+          },
+          "secciones": [
+            {
+              "titulo": "Recibir un abono",
+              "pasos": [
+                "Abre la ficha del cliente (web: Clientes; tablet: Inicio → Clientes) y toca «Recibir abono».",
+                "Escribe el monto y la forma de pago. Entra a la caja del turno abierto.",
+                "Se aplica a las cuentas más antiguas primero. No puede pasar del saldo."
+              ]
+            },
+            {
+              "titulo": "Cartera",
+              "puntos": [
+                "Todas las cuentas pendientes, vencidas o pagadas.",
+                "Antigüedad por tramos: por vencer, 1–30, 31–60, 61–90 y más de 90 días."
+              ]
+            },
+            {
+              "titulo": "Estado de cuenta",
+              "texto": "Saldo anterior, ventas al crédito, abonos y devoluciones del periodo con saldo corrido. Se ve en pantalla y se descarga en PDF para mandarlo al cliente."
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "Registré mal un abono.",
+              "r": "Se anula con autorización, solo dentro del turno en que se recibió."
+            }
+          ],
+          "relacionados": [
+            "clientes-credito"
+          ]
+        },
+        {
+          "id": "pedidos-especiales",
+          "titulo": "Pedidos especiales (encargos)",
+          "resumen": "Pasteles y pedidos con fecha de entrega, anticipo y detalle por línea.",
+          "permisos": [
+            "pedidos.gestionar"
+          ],
+          "donde": {
+            "web": "Clientes → Pedidos especiales",
+            "tablet": "Inicio → Pedidos especiales"
+          },
+          "secciones": [
+            {
+              "titulo": "Registrar el encargo",
+              "pasos": [
+                "Nombre y teléfono (o un cliente registrado), fecha y hora de entrega.",
+                "Productos con detalle por línea: sabor, dedicatoria, color.",
+                "Anticipo, si deja: entra a la caja. Se puede agregar más anticipo después.",
+                "Imprime el comprobante para el cliente."
+              ]
+            },
+            {
+              "titulo": "Entregar",
+              "pasos": [
+                "Abre el pedido y toca «Entregar y cobrar»: se abre la venta rápida con el pedido cargado y el aviso «Entrega del pedido…».",
+                "Solo se cobra lo que falta después del anticipo."
+              ]
+            },
+            {
+              "titulo": "Cancelar",
+              "texto": "Al cancelar se elige si se devuelve el anticipo (sale de la caja) o se retiene."
+            }
+          ],
+          "ejemplos": [
+            {
+              "titulo": "Pastel de cumpleaños de $15 con anticipo de $5",
+              "pasos": [
+                "Registra el pedido para el sábado 10:00 con la dedicatoria «Feliz cumple, Sofi».",
+                "Recibe $5 de anticipo y entrega el comprobante.",
+                "El sábado, al entregar, se cobran solo $10."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "¿Dónde veo los encargos de hoy?",
+              "r": "En el panel de inicio aparecen los pedidos para hoy y los atrasados."
+            }
+          ],
+          "relacionados": [
+            "venta-rapida"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "compras-gastos",
+      "titulo": "Módulo compras y gastos",
+      "descripcion": "Proveedores, órdenes de compra, compras, cuentas por pagar y gastos.",
+      "manuales": [
+        {
+          "id": "proveedores",
+          "titulo": "Proveedores",
+          "resumen": "Registrar proveedores y ver lo que se les debe y se les compra.",
+          "permisos": [
+            "proveedores.gestionar"
+          ],
+          "donde": {
+            "web": "Compras → Proveedores",
+            "tablet": "Inicio → Compras → Proveedores y pagos (o «+ Nuevo proveedor» al registrar una compra)"
+          },
+          "secciones": [
+            {
+              "titulo": "Datos",
+              "puntos": [
+                "Nombre, NIT (no se repite), NRC, contacto, teléfono, correo, dirección y notas.",
+                "Plazo de crédito en días: define cuándo vence cada compra."
+              ]
+            },
+            {
+              "titulo": "La ficha",
+              "puntos": [
+                "Lo que se le debe y lo vencido.",
+                "Compras y pagos.",
+                "Los productos que se le compran."
+              ]
+            }
+          ],
+          "relacionados": [
+            "compras",
+            "cuentas-pagar"
+          ]
+        },
+        {
+          "id": "ordenes-compra",
+          "titulo": "Órdenes de compra",
+          "resumen": "Pedir mercadería al proveedor y recibirla completa o por partes.",
+          "permisos": [
+            "compras.ver",
+            "compras.gestionar"
+          ],
+          "donde": {
+            "web": "Compras → Órdenes de compra"
+          },
+          "secciones": [
+            {
+              "titulo": "Ciclo de una orden",
+              "pasos": [
+                "Crea la orden: proveedor, entrega esperada, productos con unidad de compra, cantidad y costo estimado. Queda en borrador.",
+                "Márcala como enviada y descarga el PDF para mandarlo al proveedor.",
+                "Al llegar la mercadería, registra la compra desde la orden: se precarga lo pendiente.",
+                "Si llega por partes, la orden queda «recibida en parte». Si no llegará el resto, usa «Cerrar sin recibir el resto»."
+              ]
+            },
+            {
+              "titulo": "Reglas",
+              "puntos": [
+                "Se edita solo en borrador o enviada.",
+                "Se cancela solo si no tiene recepciones."
+              ]
+            }
+          ],
+          "relacionados": [
+            "compras"
+          ]
+        },
+        {
+          "id": "compras",
+          "titulo": "Registrar una compra",
+          "resumen": "Recibir mercadería: entra al inventario, actualiza el costo y genera la cuenta por pagar.",
+          "permisos": [
+            "compras.gestionar"
+          ],
+          "donde": {
+            "web": "Compras → Compras → Nueva compra",
+            "tablet": "Inicio → Compras → + Nueva compra (tocar una compra de la lista para anularla)"
+          },
+          "secciones": [
+            {
+              "titulo": "Paso a paso",
+              "pasos": [
+                "Elige el proveedor (o una orden de compra).",
+                "Datos del documento: tipo (factura, crédito fiscal, ticket), número e IVA.",
+                "Agrega los productos en la unidad del proveedor (quintal, arroba, docena, galón): el sistema muestra cuánto entra en la unidad del inventario y su costo («= 200 lb · $0.45/lb»).",
+                "Elige contado o crédito. De contado se paga en el acto: desde la caja o fuera de caja.",
+                "Guarda."
+              ]
+            },
+            {
+              "titulo": "Qué hace el sistema",
+              "puntos": [
+                "Suma al inventario y recalcula el costo promedio.",
+                "Crea la cuenta por pagar con su vencimiento según el plazo del proveedor.",
+                "No deja registrar dos veces el mismo documento del mismo proveedor."
+              ]
+            },
+            {
+              "titulo": "Anular",
+              "texto": "Saca del inventario lo que entró. Si fue de contado desde la caja, el dinero vuelve a la gaveta. Si es al crédito y ya tiene pagos, primero se anulan los pagos."
+            },
+            {
+              "titulo": "Proveedor nuevo",
+              "texto": "Si el proveedor no está, en «Elegir proveedor» toca «+ Nuevo proveedor»: se registra y queda elegido para la compra."
+            }
+          ],
+          "ejemplos": [
+            {
+              "titulo": "2 quintales de harina a $45 cada uno",
+              "pasos": [
+                "Agrega Harina, unidad de compra Quintal, cantidad 2, costo $45.",
+                "Entran 200 lb a $0.45/lb.",
+                "Elige crédito: vence según el plazo del proveedor."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "Me rechaza la unidad de compra.",
+              "r": "Debe ser del mismo tipo que la del inventario: no se puede comprar en litros algo que se lleva en libras."
+            }
+          ],
+          "relacionados": [
+            "cuentas-pagar",
+            "unidades-categorias"
+          ]
+        },
+        {
+          "id": "cuentas-pagar",
+          "titulo": "Cuentas por pagar",
+          "resumen": "Pagar a proveedores desde la caja o desde el banco.",
+          "permisos": [
+            "cuentas_pagar.gestionar"
+          ],
+          "donde": {
+            "web": "Compras → Cuentas por pagar",
+            "tablet": "Inicio → Compras → Proveedores y pagos → tocar el proveedor → Registrar pago"
+          },
+          "secciones": [
+            {
+              "titulo": "Pagar",
+              "pasos": [
+                "Elige el proveedor y toca pagar.",
+                "Escribe el monto y elige si sale de la caja (efectivo del turno) o fuera de caja (banco, cheque).",
+                "Aplica a una compra elegida o a las más antiguas primero."
+              ]
+            },
+            {
+              "titulo": "Resumen",
+              "puntos": [
+                "Total adeudado, vencido y lo que vence en 7 días.",
+                "Historial de pagos realizados."
+              ]
+            }
+          ],
+          "relacionados": [
+            "compras",
+            "proveedores"
+          ]
+        },
+        {
+          "id": "gastos",
+          "titulo": "Gastos",
+          "resumen": "Luz, gas, alquiler, planilla y otros gastos, con su comprobante y categorías propias.",
+          "permisos": [
+            "gastos.registrar",
+            "gastos.ver",
+            "gastos.categorias"
+          ],
+          "donde": {
+            "web": "Gastos",
+            "tablet": "Inicio → Gastos (o «Gasto» en Caja y turno); tocar un gasto para anularlo"
+          },
+          "secciones": [
+            {
+              "titulo": "Registrar un gasto",
+              "pasos": [
+                "Elige la categoría (botones grandes).",
+                "Descripción, monto, forma de pago y, si quieres, proveedor y número de factura.",
+                "Elige si salió de la caja o fuera de caja (banco, tarjeta del negocio).",
+                "Adjunta foto o PDF del comprobante (en la tablet, con la cámara).",
+                "Guarda."
+              ]
+            },
+            {
+              "titulo": "Categorías",
+              "texto": "Vienen creadas: Servicios básicos, Gas, Alquiler, Planilla, Mantenimiento, Limpieza, Transporte, Papelería, Impuestos y trámites, y Otros. Con el permiso «Crear y editar categorías de gasto» se agregan, renombran o desactivan (pestaña Categorías en la web; botón «Categorías» en la tablet)."
+            },
+            {
+              "titulo": "Resumen",
+              "puntos": [
+                "Total, lo pagado desde caja y fuera de caja.",
+                "Por categoría con porcentaje, por mes y por forma de pago."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "¿Gasto o compra?",
+              "r": "Compra es mercadería o insumo que entra al inventario. Gasto es un servicio o pago que no se guarda (luz, gas, sueldo)."
+            },
+            {
+              "p": "¿Cómo anulo un gasto?",
+              "r": "Con autorización. Si salió de la caja, solo mientras su turno siga abierto; el dinero vuelve a la gaveta."
+            }
+          ],
+          "relacionados": [
+            "movimientos-caja",
+            "compras"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inventario",
+      "titulo": "Módulo inventario",
+      "descripcion": "Productos, existencias, entradas y salidas, conteo físico y kárdex.",
+      "manuales": [
+        {
+          "id": "productos",
+          "titulo": "Productos",
+          "resumen": "Crear un producto: clase, precio, costo, si lleva inventario, mínimo y cómo se ve en el POS.",
+          "permisos": [
+            "productos.ver",
+            "productos.gestionar"
+          ],
+          "donde": {
+            "web": "Inventario → Catálogo de productos",
+            "tablet": "Inicio → Catálogo → Productos"
+          },
+          "secciones": [
+            {
+              "titulo": "Clases de producto",
+              "puntos": [
+                "Producto terminado: pan, pasteles.",
+                "Materia prima: harina, azúcar, levadura.",
+                "Reventa: bebidas, golosinas.",
+                "Empaque: bolsas, cajas."
+              ]
+            },
+            {
+              "titulo": "Interruptores importantes",
+              "puntos": [
+                "Se vende: aparece en el POS.",
+                "Lleva inventario: tiene existencia propia. Si no lleva (limonada, desayuno), su receta se descuenta al venderlo.",
+                "Admite decimales: para lo que se vende o usa por peso.",
+                "Consumo interno: para la comida del personal y cortesías; precio $0 y no entra a la caja."
+              ]
+            },
+            {
+              "titulo": "Otros datos",
+              "puntos": [
+                "Costo, precio y margen calculado. Cambiar precio o costo pide permiso y queda en auditoría.",
+                "Stock mínimo: al llegar a él, el producto entra en alerta y va a la lista «Por comprar».",
+                "Código de barras, color y orden del botón en el POS.",
+                "Categoría: define a qué área sale su comanda («Comanda: Barra»)."
+              ]
+            }
+          ],
+          "relacionados": [
+            "existencias",
+            "recetas",
+            "ordenar-pos"
+          ]
+        },
+        {
+          "id": "existencias",
+          "titulo": "Existencias y alertas",
+          "resumen": "Cuánto hay de cada cosa, cuánto vale y qué está por acabarse.",
+          "permisos": [
+            "inventario.ver"
+          ],
+          "donde": {
+            "web": "Inventario → Inventarios",
+            "tablet": "Inicio → Inventario"
+          },
+          "secciones": [
+            {
+              "titulo": "La pantalla",
+              "puntos": [
+                "Tarjetas: productos, en alerta (al tocar filtra) y valor del inventario al costo.",
+                "Filtros por clase, categoría y estado (en alerta, sin existencia).",
+                "Stock mínimo editable en la tabla.",
+                "Acceso al kárdex de cada producto."
+              ]
+            },
+            {
+              "titulo": "Avisos",
+              "texto": "Cuando un producto llega a su mínimo o queda negativo, quienes ven inventario reciben un aviso en la campana (web) o en «Avisos» (tablet). Al reponerlo y volver a bajar, avisa otra vez."
+            }
+          ],
+          "relacionados": [
+            "registro-inventario",
+            "kardex"
+          ]
+        },
+        {
+          "id": "registro-inventario",
+          "titulo": "Entradas, salidas y ajustes",
+          "resumen": "Movimientos manuales de inventario cuando no vienen de una venta, compra o producción.",
+          "permisos": [
+            "inventario.registrar",
+            "inventario.ajustar"
+          ],
+          "donde": {
+            "web": "Inventario → Inventarios → Nuevo registro",
+            "tablet": "Inicio → Inventario → tocar el producto → Entrada, Salida o Ajustar a lo contado"
+          },
+          "secciones": [
+            {
+              "titulo": "Tipos",
+              "puntos": [
+                "Entrada: llega producto sin compra (regalo, préstamo). Puede llevar costo.",
+                "Salida: sale producto sin venta (uso en el local).",
+                "Ajuste: se escribe lo contado y el sistema corrige la diferencia. Motivo obligatorio y permiso especial."
+              ]
+            },
+            {
+              "titulo": "Insumos de receta",
+              "texto": "Bajar a mano un insumo que se usa en una receta activa («se acabó el aceite») pide autorización o PIN, para que no se descuadren las recetas."
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "¿Para registrar lo dañado uso una salida?",
+              "r": "Mejor usa Mermas: queda con motivo y aparece en los reportes de merma."
+            }
+          ],
+          "relacionados": [
+            "conteo-fisico",
+            "mermas"
+          ]
+        },
+        {
+          "id": "conteo-fisico",
+          "titulo": "Conteo físico",
+          "resumen": "Contar lo que hay y corregir las diferencias de una vez.",
+          "permisos": [
+            "inventario.ajustar"
+          ],
+          "donde": {
+            "web": "Inventario → Inventarios → Conteo",
+            "tablet": "Inicio → Inventario → Conteo físico"
+          },
+          "secciones": [
+            {
+              "titulo": "Paso a paso",
+              "pasos": [
+                "Filtra lo que vas a contar (por categoría o clase).",
+                "Escribe lo contado. La pantalla muestra la diferencia en cantidad y en dinero.",
+                "«Copiar existencias» llena con lo del sistema, para cambiar solo lo distinto.",
+                "Aplica: solo se ajustan los productos con diferencia."
+              ]
+            }
+          ],
+          "relacionados": [
+            "kardex"
+          ]
+        },
+        {
+          "id": "kardex",
+          "titulo": "Kárdex y movimientos",
+          "resumen": "Todo lo que entró y salió de un producto, con saldo y costo.",
+          "permisos": [
+            "inventario.kardex",
+            "inventario.ver"
+          ],
+          "donde": {
+            "web": "Inventario → Inventarios → Kárdex / Movimientos",
+            "tablet": "Inicio → Inventario → tocar el producto → Ver kárdex"
+          },
+          "secciones": [
+            {
+              "titulo": "Kárdex de un producto",
+              "puntos": [
+                "Saldo inicial, entradas, salidas y saldo final del periodo.",
+                "Cada movimiento con documento (venta, compra, producción, merma…), usuario, saldo y costo."
+              ]
+            },
+            {
+              "titulo": "Movimientos",
+              "texto": "Historial general de todos los productos, con filtros por fecha, tipo y producto."
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "La existencia no me cuadra.",
+              "r": "Abre el kárdex del producto: ahí se ve qué movimiento lo cambió y quién lo hizo."
+            }
+          ],
+          "relacionados": [
+            "existencias"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "produccion",
+      "titulo": "Módulo producción",
+      "descripcion": "Recetas, producción del día, mermas y su resumen.",
+      "manuales": [
+        {
+          "id": "recetas",
+          "titulo": "Recetas",
+          "resumen": "Recetas de producción (pan, pasteles) y recetas que se descuentan al vender (bebidas, desayunos).",
+          "permisos": [
+            "recetas.gestionar"
+          ],
+          "donde": {
+            "web": "Producción → Recetas",
+            "tablet": "Inicio → Catálogo → Recetas"
+          },
+          "secciones": [
+            {
+              "titulo": "Dos tipos, los decide el sistema",
+              "puntos": [
+                "Producción: el producto lleva inventario (pan). La receta se usa al registrar lo horneado: descuenta insumos y suma pan.",
+                "Se descuenta al vender: el producto no lleva inventario (americano, desayuno, limonada). Cada venta descuenta sus ingredientes.",
+                "En el listado se filtra por tipo con los botones de arriba."
+              ]
+            },
+            {
+              "titulo": "Crear una receta",
+              "pasos": [
+                "Elige el producto y el rendimiento (cuántas unidades salen; en las de venta, normalmente 1).",
+                "Agrega ingredientes con cantidad, unidad (cualquier unidad del mismo tipo: gramos de algo que se compra en libras) y % de merma esperada.",
+                "Escribe el procedimiento o notas.",
+                "El editor calcula el costo de la tanda, el costo por unidad y el margen con el precio de venta."
+              ]
+            },
+            {
+              "titulo": "Versiones",
+              "texto": "Si una receta ya se usó, al editarla se crea una versión nueva y la anterior queda en el historial; se puede volver a activar."
+            }
+          ],
+          "ejemplos": [
+            {
+              "titulo": "Pan francés",
+              "pasos": [
+                "Rendimiento 100 panes: 20 lb de harina (+5% de merma) y 200 g de levadura.",
+                "El costo por pan sale del costo promedio actual de cada insumo."
+              ]
+            },
+            {
+              "titulo": "Americano",
+              "pasos": [
+                "Producto sin inventario propio, rendimiento 1.",
+                "Ingredientes: 18 g de café, 10 g de azúcar, 1 vaso.",
+                "Cada americano vendido descuenta eso. El cliente puede pedir cambios con «Ingredientes»."
+              ]
+            }
+          ],
+          "relacionados": [
+            "produccion-dia",
+            "extras-ingredientes"
+          ]
+        },
+        {
+          "id": "produccion-dia",
+          "titulo": "Producción del día",
+          "resumen": "Registrar lo horneado: descuenta los insumos y suma el producto con su costo real.",
+          "permisos": [
+            "produccion.registrar",
+            "produccion.ver"
+          ],
+          "donde": {
+            "web": "Producción → Producción del día",
+            "tablet": "Inicio → Producción (en «Producido hoy» está «Anular»)"
+          },
+          "secciones": [
+            {
+              "titulo": "Paso a paso",
+              "pasos": [
+                "Elige la receta y la cantidad planificada: calcula los insumos que se van a usar.",
+                "Escribe lo que realmente salió.",
+                "Si se usó distinto de lo teórico, corrige el consumo real de cada insumo (o agrega uno que no estaba).",
+                "Guarda: salen los insumos y entra el producto al costo real del lote."
+              ]
+            },
+            {
+              "titulo": "Indicadores",
+              "puntos": [
+                "Rendimiento: producido frente a planificado (%).",
+                "Consumo real frente a teórico por insumo."
+              ]
+            },
+            {
+              "titulo": "Me equivoqué",
+              "texto": "Anula la producción con motivo: sale del inventario lo producido y regresan los insumos."
+            }
+          ],
+          "ejemplos": [
+            {
+              "titulo": "200 panes planificados, salen 190",
+              "pasos": [
+                "Elige Pan francés, planificado 200: pide 40 lb de harina y 400 g de levadura.",
+                "Escribe 190 producidos y corrige la harina a 42 lb si así fue.",
+                "Rendimiento 95%; el costo por pan sale del costo real del lote."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "No me deja registrar.",
+              "r": "Si faltan insumos y el negocio no permite stock negativo, no se registra nada. Registra primero la compra."
+            }
+          ],
+          "relacionados": [
+            "recetas",
+            "resumen-produccion"
+          ]
+        },
+        {
+          "id": "mermas",
+          "titulo": "Mermas y cierre del día",
+          "resumen": "Sacar del inventario lo que no se vendió, se quemó o se dañó, a su costo y con motivo.",
+          "permisos": [
+            "mermas.registrar"
+          ],
+          "donde": {
+            "web": "Producción → Mermas y cierre del día",
+            "tablet": "Inicio → Producción → Mermas (en «Registradas hoy» está «Anular»)"
+          },
+          "secciones": [
+            {
+              "titulo": "La lista",
+              "puntos": [
+                "Grupos: A la venta (lo de vitrina), Materia prima, Todo con existencia y Con merma escrita.",
+                "El buscador filtra la lista y ofrece agregar productos que no están en ella («+ Fresas»).",
+                "Lo agregado a mano aparece en todos los grupos y tiene «quitar».",
+                "Lo escrito se guarda en el equipo hasta registrarlo: recargar no lo borra."
+              ]
+            },
+            {
+              "titulo": "Paso a paso",
+              "pasos": [
+                "Revisa la fecha.",
+                "En cada producto escribe la cantidad en su unidad (gramos, unidades…), el motivo (vencido, quemado, dañado, otro) y un detalle si hace falta.",
+                "Abre «Con merma escrita» para revisar todo.",
+                "Toca «Registrar mermas»: sale del inventario a su costo."
+              ]
+            }
+          ],
+          "ejemplos": [
+            {
+              "titulo": "Cierre del día con pan sobrante y fresas dañadas",
+              "pasos": [
+                "En «A la venta», escribe 12 en Pan francés con motivo Vencido.",
+                "Busca «fresa» (o entra a Materia prima) y escribe 150 (g) con motivo Dañado.",
+                "Revisa en «Con merma escrita» y registra."
+              ]
+            }
+          ],
+          "preguntas": [
+            {
+              "p": "Me equivoqué en una merma registrada.",
+              "r": "Anúlala en el historial de abajo: la existencia vuelve al inventario."
+            }
+          ],
+          "relacionados": [
+            "resumen-produccion",
+            "registro-inventario"
+          ]
+        },
+        {
+          "id": "resumen-produccion",
+          "titulo": "Resumen de producción",
+          "resumen": "Cuánto se produjo, cuánto se perdió y dónde se desvió el consumo.",
+          "permisos": [
+            "produccion.ver"
+          ],
+          "donde": {
+            "web": "Producción → Resumen de producción"
+          },
+          "secciones": [
+            {
+              "titulo": "Qué muestra",
+              "puntos": [
+                "Totales de producción y mermas, con el % de merma sobre lo producido.",
+                "Por producto: planificado, producido, rendimiento y costo.",
+                "Desvíos de consumo por insumo.",
+                "Mermas por motivo y totales por día."
+              ]
+            }
+          ],
+          "relacionados": [
+            "reportes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reportes",
+      "titulo": "Módulo reportes",
+      "descripcion": "Panel de inicio y los 15 reportes con exportación.",
+      "manuales": [
+        {
+          "id": "panel",
+          "titulo": "Panel de inicio y resumen del día",
+          "resumen": "Cómo va el negocio de un vistazo.",
+          "permisos": [
+            "dashboard.ver",
+            "reportes.ver"
+          ],
+          "donde": {
+            "web": "Dashboard",
+            "tablet": "Inicio → Resumen del día"
+          },
+          "secciones": [
+            {
+              "titulo": "Qué muestra",
+              "puntos": [
+                "Ventas del periodo (hoy, ayer, esta semana, este mes…), tickets y ticket promedio.",
+                "Ventas por hora y lo más vendido.",
+                "Alertas: productos bajo el mínimo, encargos para hoy y atrasados.",
+                "Con permiso de reportes: gastos, utilidad, lo que se debe cobrar y pagar.",
+                "Últimos pedidos con acceso directo al ticket."
+              ]
+            }
+          ],
+          "relacionados": [
+            "reportes"
+          ]
+        },
+        {
+          "id": "reportes",
+          "titulo": "Reportes",
+          "resumen": "Ventas, caja, compras, gastos, inventario, producción y cartera, con Excel y PDF.",
+          "permisos": [
+            "reportes.ver"
+          ],
+          "donde": {
+            "web": "Reportes"
+          },
+          "secciones": [
+            {
+              "titulo": "Reportes disponibles",
+              "puntos": [
+                "Ventas: por día, por hora, por empleado, por forma de pago, productos más vendidos y utilidad estimada.",
+                "Caja: cierres de caja.",
+                "Compras y gastos: libro de compras y gastos.",
+                "Inventario: inventario valorizado y kárdex de un producto.",
+                "Producción: producción y mermas.",
+                "Cartera: cuentas por cobrar y por pagar."
+              ]
+            },
+            {
+              "titulo": "Cómo usarlos",
+              "pasos": [
+                "Elige el reporte a la izquierda.",
+                "Ajusta las fechas (máximo un año) y los filtros propios del reporte.",
+                "Revisa indicadores, gráfica y tabla con totales.",
+                "Descarga en Excel o PDF (requiere el permiso de exportar; queda en auditoría)."
+              ]
+            },
+            {
+              "titulo": "Utilidad estimada",
+              "texto": "Ventas sin IVA menos el costo de lo vendido, menos mermas y gastos. Las compras no restan: son inventario y su costo cuenta al vender, producir o mermar. Es una estimación de gestión, no contabilidad formal."
+            }
+          ],
+          "relacionados": [
+            "panel"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "configuracion",
+      "titulo": "Módulo configuración",
+      "descripcion": "Datos del negocio, cajas, impresoras, mesas, áreas, extras y catálogos.",
+      "manuales": [
+        {
+          "id": "datos-negocio",
+          "titulo": "Datos del negocio",
+          "resumen": "Datos del ticket, IVA, stock negativo, descuento máximo y cierre ciego.",
+          "permisos": [
+            "configuracion.gestionar"
+          ],
+          "donde": {
+            "web": "Configuración → Datos del negocio",
+            "tablet": "Inicio → Ajustes → Negocio, cajas y pagos (el logo, en la web)"
+          },
+          "secciones": [
+            {
+              "titulo": "Opciones",
+              "puntos": [
+                "Datos del recibo: razón social (sale grande arriba), nombre comercial, dirección, NIT, NRC, actividad económica, tipo de establecimiento, teléfono y el mensaje del pie.",
+                "IVA y si los precios lo incluyen.",
+                "Permitir stock negativo: si está apagado, no se vende ni se pide más de lo que hay (los productos salen «Agotado»).",
+                "Descuento máximo sin autorización: arriba de eso se pide PIN.",
+                "Cierre ciego: quien cierra no ve el esperado mientras cuenta."
+              ]
+            }
+          ],
+          "relacionados": [
+            "cerrar-turno"
+          ]
+        },
+        {
+          "id": "cajas-pagos",
+          "titulo": "Cajas y formas de pago",
+          "resumen": "Las cajas físicas, su impresora y los métodos de pago.",
+          "permisos": [
+            "configuracion.gestionar"
+          ],
+          "donde": {
+            "web": "Configuración → Cajas y formas de pago",
+            "tablet": "Inicio → Ajustes → Negocio, cajas y pagos"
+          },
+          "secciones": [
+            {
+              "titulo": "Cajas",
+              "puntos": [
+                "Cada caja física con su impresora de tickets.",
+                "No se desactiva una caja con turno abierto."
+              ]
+            },
+            {
+              "titulo": "Formas de pago",
+              "puntos": [
+                "Efectivo, Tarjeta, Transferencia, Crédito u otras.",
+                "Indica si mueve la gaveta (cuenta para el cuadre) y si pide referencia.",
+                "Siempre debe quedar un efectivo activo."
+              ]
+            }
+          ],
+          "relacionados": [
+            "impresoras"
+          ]
+        },
+        {
+          "id": "impresoras",
+          "titulo": "Impresoras",
+          "resumen": "Conectar las térmicas de tickets y comandas, probarlas y reintentar lo que falló.",
+          "permisos": [
+            "impresoras.gestionar"
+          ],
+          "donde": {
+            "web": "Configuración → Impresoras",
+            "tablet": "Inicio → Ajustes → Impresoras"
+          },
+          "secciones": [
+            {
+              "titulo": "Agregar una impresora",
+              "pasos": [
+                "Conexión: Red (IP y puerto 9100) o Windows (USB en el servidor, con su nombre en Windows).",
+                "Papel: 80 mm (48 caracteres) o 58 mm (32).",
+                "Uso: tickets, comandas o ambos; cajón de dinero y corte de papel.",
+                "Toca «Imprimir prueba» para comprobarla.",
+                "Toca «Prueba producción» para ver cómo sale una comanda de cocina o barra (Mesa 1, Ice latte con extras)."
+              ]
+            },
+            {
+              "titulo": "Qué impresora se usa",
+              "puntos": [
+                "Ticket: la de la caja; si no tiene, la predeterminada.",
+                "Comanda: la del área; si no, la de comandas predeterminada; si no, la de tickets.",
+                "Si falla, la venta no se detiene: se ofrece reintentar o imprimir desde el navegador."
+              ]
+            },
+            {
+              "titulo": "Impresiones con error",
+              "texto": "En el panel de errores se reintenta en la misma impresora o se envía a otra."
+            }
+          ],
+          "relacionados": [
+            "areas-modificadores",
+            "cajas-pagos"
+          ]
+        },
+        {
+          "id": "areas-modificadores",
+          "titulo": "Mesas, áreas y modificadores",
+          "resumen": "Terminales del mapa, áreas de preparación con su impresora y los grupos de extras.",
+          "permisos": [
+            "mesas.configurar"
+          ],
+          "donde": {
+            "web": "Configuración → Mesas y cocina",
+            "tablet": "Inicio → Ajustes → Mesas y cocina (áreas, categorías y mesas); los extras en Inicio → Catálogo → Extras"
+          },
+          "secciones": [
+            {
+              "titulo": "Terminales",
+              "texto": "Cada mesa o caja de mostrador del mapa: nombre, tipo, zona, capacidad, orden, caja y estado. Para llevar se vende en la venta rápida."
+            },
+            {
+              "titulo": "Áreas de preparación",
+              "puntos": [
+                "Cocina, Barra… cada una con color e impresora.",
+                "Cada categoría de productos se asigna a un área: así se sabe a qué comanda sale cada producto.",
+                "Lo que no tiene área sale en una comanda general."
+              ]
+            },
+            {
+              "titulo": "Modificadores (extras)",
+              "pasos": [
+                "Crea el grupo (Leche, Endulzante): obligatorio o no, una o varias opciones.",
+                "Agrega sus opciones con precio extra (puede ser $0).",
+                "Opcional: en cada opción, el insumo y la cantidad que se descuenta al venderla.",
+                "Asigna el grupo a los productos que lo usan."
+              ]
+            }
+          ],
+          "relacionados": [
+            "extras-ingredientes",
+            "impresoras"
+          ]
+        },
+        {
+          "id": "unidades-categorias",
+          "titulo": "Categorías y unidades de medida",
+          "resumen": "Organizar productos y convertir entre unidades (quintal, libra, gramo…).",
+          "permisos": [
+            "catalogos.gestionar"
+          ],
+          "donde": {
+            "web": "Configuración → Categorías / Unidad de medida",
+            "tablet": "Inicio → Catálogo → Categorías y unidades"
+          },
+          "secciones": [
+            {
+              "titulo": "Categorías",
+              "texto": "Agrupan productos en el POS y definen el área de su comanda."
+            },
+            {
+              "titulo": "Unidades",
+              "puntos": [
+                "Cada unidad tiene tipo (unidad, masa, volumen) y su equivalencia: «1 lb = 453.59 g».",
+                "Con eso se compra en una unidad y se lleva el inventario en otra.",
+                "Consejo: lleva el inventario de insumos en la unidad más pequeña que uses (gramos, mililitros)."
+              ]
+            }
+          ],
+          "relacionados": [
+            "productos",
+            "compras"
+          ]
+        },
+        {
+          "id": "ordenar-pos",
+          "titulo": "Ordenar POS",
+          "resumen": "El orden de los botones de productos en la venta.",
+          "permisos": [
+            "productos.gestionar"
+          ],
+          "donde": {
+            "web": "Inventario → Ordenar POS"
+          },
+          "secciones": [
+            {
+              "titulo": "Para qué sirve",
+              "texto": "Pon primero lo que más se vende para encontrarlo rápido. El color de cada botón se elige en el producto."
+            }
+          ],
+          "relacionados": [
+            "productos"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seguridad",
+      "titulo": "Módulo usuarios y seguridad",
+      "descripcion": "Usuarios, PIN, roles y permisos, y auditoría.",
+      "manuales": [
+        {
+          "id": "usuarios-pin",
+          "titulo": "Usuarios y PIN",
+          "resumen": "Crear usuarios, asignarles un rol y un PIN, y desactivarlos.",
+          "permisos": [
+            "usuarios.gestionar"
+          ],
+          "donde": {
+            "web": "Usuarios y seguridad → Usuarios / Mi cuenta y PIN",
+            "tablet": "Inicio → Ajustes → Usuarios; cada quien su PIN en Inicio → Mi PIN"
+          },
+          "secciones": [
+            {
+              "titulo": "Crear un usuario",
+              "pasos": [
+                "Nombre, correo, contraseña y rol.",
+                "PIN de 4 a 6 dígitos (no se repite entre usuarios). Sirve para autorizar y para identificarse al abrir o cerrar turno en una tablet compartida."
+              ]
+            },
+            {
+              "titulo": "Desactivar",
+              "texto": "Un usuario desactivado no puede entrar y pierde sus sesiones abiertas. El administrador principal no se puede desactivar."
+            },
+            {
+              "titulo": "Mi cuenta",
+              "texto": "Cada quien cambia su contraseña y crea o cambia su PIN."
+            }
+          ],
+          "relacionados": [
+            "roles-permisos"
+          ]
+        },
+        {
+          "id": "roles-permisos",
+          "titulo": "Roles y permisos",
+          "resumen": "Qué puede hacer cada rol, activado con interruptores por módulo.",
+          "permisos": [
+            "roles.gestionar"
+          ],
+          "donde": {
+            "web": "Usuarios y seguridad → Roles y permisos",
+            "tablet": "Inicio → Ajustes → Roles y permisos (y Manuales por rol)"
+          },
+          "secciones": [
+            {
+              "titulo": "Cómo se edita",
+              "pasos": [
+                "Elige el rol y entra a sus permisos.",
+                "Marca o desmarca uno por uno, o el módulo completo. Hay buscador.",
+                "Antes de guardar, el sistema muestra qué se agrega y qué se quita.",
+                "Guarda. El cambio aplica de inmediato; el menú del usuario conectado se actualiza al recargar."
+              ]
+            },
+            {
+              "titulo": "Roles base",
+              "puntos": [
+                "Admin: todo, incluso los permisos que se agreguen en el futuro.",
+                "Mesero: ventas, mesas, caja, compras, gastos, inventario (sin ajustes), producción y mermas.",
+                "Cajero: ventas, caja, clientes, abonos, encargos y registrar gastos.",
+                "Encargado de inventario: productos, inventario, compras, producción, mermas y reportes."
+              ]
+            }
+          ],
+          "relacionados": [
+            "usuarios-pin",
+            "auditoria"
+          ]
+        },
+        {
+          "id": "auditoria",
+          "titulo": "Auditoría",
+          "resumen": "Quién hizo qué, cuándo y desde dónde.",
+          "permisos": [
+            "auditoria.ver"
+          ],
+          "donde": {
+            "web": "Usuarios y seguridad → Auditoría"
+          },
+          "secciones": [
+            {
+              "titulo": "Qué se registra",
+              "texto": "Inicios de sesión, anulaciones, devoluciones, descuentos autorizados, cancelaciones de comanda, ajustes de inventario, cambios de precio, cierres y reaperturas de caja, compras, pagos, producción, mermas, gastos, exportaciones y cambios de usuarios y permisos."
+            },
+            {
+              "titulo": "Cómo buscar",
+              "puntos": [
+                "Filtros por fechas, usuario, módulo, acción y texto.",
+                "Cada registro muestra el antes y el después, con lo que cambió resaltado, la IP y el dispositivo."
+              ]
+            }
+          ],
+          "relacionados": [
+            "roles-permisos"
+          ]
+        }
+      ]
+    }
+  ]
+}
