@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ConfiguracionNegocio;
 use App\Models\Inventario;
 use App\Models\Notificacion;
 use App\Models\Producto;
@@ -127,5 +128,58 @@ class NotificacionesTest extends TestCase
         $this->ajustar($producto, 8)->assertOk();
 
         $this->assertSame(0, Notificacion::where('usuario_id', $mesero->id)->count());
+    }
+
+    public function test_producto_que_vende_sin_existencia_no_avisa(): void
+    {
+        $this->actuarComo('admin');
+        $producto = $this->crearProducto(stock: 20, minimo: 10);
+        $producto->update(['controla_stock' => true, 'permite_sin_existencia' => true]);
+
+        $this->ajustar($producto, 8)->assertOk();                              // llega al mínimo
+        NotificacionService::revisarStock($producto->fresh(), 8, -3, 10);      // queda en negativo
+        $this->assertSame(0, NotificacionService::sincronizarStock());
+
+        $this->assertSame(0, Notificacion::count());
+    }
+
+    public function test_marcar_vender_sin_existencia_borra_sus_avisos_pendientes(): void
+    {
+        $this->actuarComo('admin');
+        $producto = $this->crearProducto(stock: 20, minimo: 10);
+        $this->ajustar($producto, 8)->assertOk();
+        $this->assertSame(1, Notificacion::count());
+
+        $producto->update(['controla_stock' => true, 'permite_sin_existencia' => true]);
+        NotificacionService::limpiarStock($producto);
+
+        $this->assertSame(0, Notificacion::count());
+    }
+
+    public function test_con_stock_negativo_permitido_no_avisa_del_negativo(): void
+    {
+        $this->actuarComo('admin');
+        ConfiguracionNegocio::actual()->update(['permitir_stock_negativo' => true]);
+        $producto = $this->crearProducto(stock: 2, minimo: 0);
+
+        NotificacionService::revisarStock($producto, 2, -1, 0);   // sin mínimo: queda en negativo
+        $this->assertSame(0, Notificacion::count());
+
+        $conMinimo = $this->crearProducto(stock: 20, minimo: 10);
+        NotificacionService::revisarStock($conMinimo, 20, -1, 10); // sí avisa que se agotó
+        $aviso = Notificacion::sole();
+        $this->assertSame('stock_bajo', $aviso->tipo);
+        $this->assertStringContainsString('se agotó', $aviso->titulo);
+    }
+
+    public function test_sin_stock_negativo_permitido_si_avisa_del_negativo(): void
+    {
+        $this->actuarComo('admin');
+        ConfiguracionNegocio::actual()->update(['permitir_stock_negativo' => false]);
+        $producto = $this->crearProducto(stock: 2, minimo: 0);
+
+        NotificacionService::revisarStock($producto, 2, -1, 0);
+
+        $this->assertSame('stock_negativo', Notificacion::sole()->tipo);
     }
 }

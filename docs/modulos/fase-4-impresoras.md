@@ -146,6 +146,7 @@ El servidor va en un VPS, así que ya no llega a las impresoras de la red del lo
 - **Tablet:**
   - Módulo nativo local `appfrozenbar/modules/impresora-tcp` (Kotlin, solo Android): `enviar(host, puerto, base64, tiempoMs)`. Funciona en el APK (`eas build --profile preview`), no en Expo Go.
   - `src/lib/impresionLocal.ts` toma la cola cada 3 s y 300 ms después de cada POST.
-  - En Ajustes → Impresoras está el interruptor «Esta tablet imprime», apagado por defecto.
+  - Todas las tablets con sesión imprimen (sin interruptor: las tablets del negocio no salen del local). Ajustes → Impresoras muestra «Las tablets imprimen» con la ayuda «¿Cómo funciona?» y el botón «Revisar la cola ahora». Con varias, cada trabajo lo toma una sola; si la que lo toma no alcanza la impresora, queda en error y se reimprime.
+  - «Impresiones con error» (Ajustes → Impresoras): lista lo que no salió con «Reintentar», «Reintentar todas», «Quitar» y «Quitar todas». La tarjeta avisa en rojo cuántas no salieron. Reintentar lo regresa a la cola y la tablet lo manda de inmediato (`procesarCola({ silencioso: true })`, que se puede esperar); lo que vuelve a fallar sigue en la lista.
 - **Corrección:** el formulario de impresoras de la tablet no mandaba `tipo_impresion`, así que guardar la Star desde la tablet la regresaba a `escpos`. Ahora tiene «Tipo de impresora».
 - Pruebas: `tests/Feature/ImpresionColaTest.php`.

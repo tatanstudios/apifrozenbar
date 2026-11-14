@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Administrador;
+use App\Models\ConfiguracionNegocio;
 use App\Models\Inventario;
 use App\Models\Notificacion;
 use App\Models\Producto;
@@ -29,11 +30,24 @@ class NotificacionService
         float $stockMinimo,
         ?float $minimoAnterior = null, // cuando lo que cambió fue el mínimo
     ): void {
-        $antes = InventarioService::enAlerta($stockAnterior, $minimoAnterior ?? $stockMinimo);
-        $ahora = InventarioService::enAlerta($stockActual, $stockMinimo);
+        // «Permitir vender sin existencia» (Coca-Cola, golosinas): se vende aunque marque 0 y
+        // quedaría siempre en negativo, así que no se avisa nada de su existencia
+        if ($producto->permite_sin_existencia) {
+            return;
+        }
+
+        // Con «Permitir stock negativo» del negocio, quedar en negativo es normal: no se avisa de eso.
+        // Solo se avisa si el producto tiene mínimo y lo alcanza (o se agota por debajo de él).
+        $negativoPermitido = self::negativoPermitido();
+        $enAlerta = fn (float $stock, float $minimo) => $negativoPermitido
+            ? $minimo > 0 && $stock <= $minimo
+            : InventarioService::enAlerta($stock, $minimo);
+
+        $antes = $enAlerta($stockAnterior, $minimoAnterior ?? $stockMinimo);
+        $ahora = $enAlerta($stockActual, $stockMinimo);
 
         $tipo = match (true) {
-            $stockActual < 0 && $stockAnterior >= 0 => 'stock_negativo',
+            $stockActual < 0 && $stockAnterior >= 0 && !$negativoPermitido => 'stock_negativo',
             $ahora && !$antes                       => 'stock_bajo',
             default                                 => null,
         };
@@ -88,6 +102,11 @@ class NotificacionService
             $stock  = (float) $producto->inventario->stock_actual;
             $minimo = (float) $producto->inventario->stock_minimo;
 
+            // Mismas reglas que revisarStock: vende sin existencia → nada; negativo permitido → solo con mínimo
+            if ($producto->permite_sin_existencia || (self::negativoPermitido() && !($minimo > 0 && $stock <= $minimo))) {
+                continue;
+            }
+
             foreach (self::destinatariosStock() as $usuario) {
                 $tiene = Notificacion::where('usuario_id', $usuario->id)
                     ->where('producto_id', $producto->id)
@@ -97,7 +116,7 @@ class NotificacionService
                     continue;
                 }
 
-                $tipo = $stock < 0 ? 'stock_negativo' : 'stock_bajo';
+                $tipo = $stock < 0 && !self::negativoPermitido() ? 'stock_negativo' : 'stock_bajo';
                 [$titulo, $mensaje] = self::textoStock($producto, $tipo, $stock, $minimo);
 
                 Notificacion::create([
@@ -113,6 +132,23 @@ class NotificacionService
         }
 
         return $creadas;
+    }
+
+    /**
+     * Borra los avisos de stock sin leer de un producto (al marcarle «Permitir vender sin
+     * existencia» los que ya tenía dejan de tener sentido).
+     */
+    public static function limpiarStock(Producto $producto): void
+    {
+        Notificacion::where('producto_id', $producto->id)
+            ->whereIn('tipo', ['stock_bajo', 'stock_negativo'])
+            ->noLeidas()
+            ->delete();
+    }
+
+    private static function negativoPermitido(): bool
+    {
+        return (bool) ConfiguracionNegocio::actual()->permitir_stock_negativo;
     }
 
     /**
@@ -144,7 +180,7 @@ class NotificacionService
 
         return match (true) {
             $tipo === 'stock_negativo' => ["{$producto->nombre} quedó en negativo", "Existencia: {$cantidad}. Registra la entrada o ajusta el conteo."],
-            $stock == 0                => ["{$producto->nombre} se agotó", 'Mínimo: ' . self::formato($minimo) . ($unidad ? " {$unidad}" : '') . '.'],
+            $stock <= 0                => ["{$producto->nombre} se agotó", 'Mínimo: ' . self::formato($minimo) . ($unidad ? " {$unidad}" : '') . '.'],
             default                    => ["{$producto->nombre} llegó a su mínimo", "Quedan {$cantidad} (mínimo " . self::formato($minimo) . ').'],
         };
     }

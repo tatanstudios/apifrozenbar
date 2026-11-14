@@ -208,6 +208,9 @@ class InventarioService
      * Productos activos con existencia en su mínimo o por debajo (o en negativo),
      * primero los que están más lejos de su mínimo. Es también la lista de compras
      * del cierre de turno: lo que está arriba del mínimo no aparece.
+     *
+     * Los productos con «Permitir vender sin existencia» (Coca-Cola, golosinas) no entran: su
+     * existencia no se sigue (quedan en negativo a propósito), igual que no generan avisos.
      */
     public static function productosEnAlerta(): array
     {
@@ -216,6 +219,7 @@ class InventarioService
             ->leftJoin('unidades_medida', 'unidades_medida.id', '=', 'productos.unidad_medida_id')
             ->where('productos.activo', true)
             ->where('productos.controla_stock', true)
+            ->where('productos.permite_sin_existencia', false)
             ->where(fn ($q) => $q->where('inventario.stock_actual', '<', 0)
                 ->orWhere(fn ($w) => $w->where('inventario.stock_minimo', '>', 0)
                     ->whereColumn('inventario.stock_actual', '<=', 'inventario.stock_minimo')))

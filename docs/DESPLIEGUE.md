@@ -181,14 +181,14 @@ El servidor en la nube no llega a la red del local (`192.168.1.69`). Por eso:
    EAS entrega un enlace para descargar el `.apk` e instalarlo en la tablet. Hay que permitir «instalar apps desconocidas».
 3. **Configurar la tablet:**
    - En la pantalla del servidor escribe `https://pos.tudominio.com`.
-   - En Ajustes → Impresoras activa **«Esta tablet imprime»**. Hazlo solo en la tablet que está en el Wi-Fi del local.
+   - No hay que activar nada en la tablet: todas las que estén abiertas con sesión imprimen.
 4. **Probar** con «Imprimir prueba» y «Prueba producción»: deben salir en 3 segundos o menos.
 
 **Cómo funciona:**
 
 - **En el servidor:** cada ticket, comanda, aviso CANCELADO, cierre o apertura del cajón queda en `trabajos_impresion` como `pendiente`, con los bytes ya armados. Las Star reciben la imagen ya convertida.
-- **En la tablet:** la tablet que imprime toma la cola cada 3 segundos y también justo después de cada venta o envío. Abre la conexión al puerto 9100, manda los bytes y le avisa al servidor si salió.
-- **Si falla:** la tablet muestra un aviso y el trabajo queda con error en Configuración → Impresiones. Desde ahí, o desde el ticket o la comanda, se reimprime.
+- **En la tablet:** cada tablet con sesión revisa la cola cada 3 segundos y también justo después de cada venta o envío. La primera que toma un trabajo abre la conexión al puerto 9100, manda los bytes y le avisa al servidor si salió.
+- **Si falla:** la tablet muestra un aviso y el trabajo queda con error. Se reintenta en Ajustes → Impresoras → «Impresiones con error» (tablet) o en Configuración → Impresiones (web), o se reimprime desde el ticket o la comanda.
 - **Lo viejo no sale solo:** lo que lleva más de 30 minutos en cola se reintenta a mano, para no imprimir comandas que ya no sirven.
 - **Dos tablets no imprimen lo mismo:** cada trabajo queda apartado 45 segundos para quien lo tomó.
 - **Desde la web (computadora o celular):** se sigue usando el respaldo de impresión del navegador.

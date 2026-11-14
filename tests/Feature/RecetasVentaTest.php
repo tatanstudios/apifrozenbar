@@ -498,6 +498,19 @@ class RecetasVentaTest extends TestCase
             ->assertJsonPath('por_comprar.0.producto', 'Limón');
     }
 
+    public function test_la_lista_de_compras_omite_lo_que_se_vende_sin_existencia(): void
+    {
+        $this->actuarComo('admin');
+        $this->receta($this->limonada, [[$this->limon, 'Unidad', 4]])->assertCreated();
+        $this->vender([[$this->limonada, 3]], 3)->assertCreated(); // limón: 30 → 18, mínimo 20
+
+        // Se vende aunque marque 0 (como la Coca-Cola): no se compra por la lista del cierre
+        $this->limon->update(['permite_sin_existencia' => true]);
+
+        $cerrado = CajaService::cerrar($this->turno, null, 23, auth()->id());
+        $this->assertFalse(collect($cerrado->resumen['por_comprar'])->contains('producto', 'Limón'));
+    }
+
     public function test_el_ticket_de_cierre_puede_omitir_por_comprar(): void
     {
         $this->actuarComo('admin');

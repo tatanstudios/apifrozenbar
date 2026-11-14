@@ -13,6 +13,7 @@ use Illuminate\Validation\Rule;
 use App\Models\Inventario;
 use App\Services\AuditoriaService;
 use App\Services\InventarioService;
+use App\Services\NotificacionService;
 use Illuminate\Support\Facades\Log;
 
 class ProductosApiController extends Controller
@@ -464,6 +465,11 @@ class ProductosApiController extends Controller
             }
 
             $producto->save();
+
+            // Vende sin existencia: sus avisos de stock pendientes ya no aplican
+            if ($producto->permite_sin_existencia) {
+                NotificacionService::limpiarStock($producto);
+            }
 
             // 3) Sincronizar categorías
             $producto->categorias()->sync($request->input('categorias', []));
