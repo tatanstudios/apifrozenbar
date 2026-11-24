@@ -122,6 +122,8 @@ Route::middleware(['auth:sanctum', 'usuario.activo'])->group(function () {
         Route::post('/admin/unidadmedida/nuevo', [ConfiguracionApiController::class, 'registrarUnidadMedida']);
         Route::put('/admin/unidadmedida/actualizar/{id}', [ConfiguracionApiController::class, 'actualizarUnidadMedida']);
         Route::delete('/admin/unidadmedida/{id}', [ConfiguracionApiController::class, 'borrarUnidadMedida'])->whereNumber('id');
+        // TEMPORAL (pruebas con el cliente): borra todas las ventas y cortes. Solo admin.
+        Route::post('/admin/pruebas/borrar-ventas', \App\Http\Controllers\Api\Config\BorrarVentasPruebaController::class);
     });
 
     // ── IMPRESORAS ────────────────────────────────────────────
